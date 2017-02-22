@@ -1,0 +1,84 @@
+\documentclass[a4paper, 12pt, oneside]{book}
+\usepackage[top=1in,bottom=1in,left=1.25in,right=1.25in]{geometry}
+
+
+\usepackage{fontspec,xltxtra,xunicode}
+\usepackage[slantfont,boldfont]{xeCJK}
+
+\usepackage[sort&compress,longnamesfirst]{natbib}
+
+\usepackage{pdfpages}
+%\usepackage{fancyhdr}
+\usepackage{layout}
+\usepackage{xCJKnumb}
+\usepackage{titlesec} % 改变章节标题格式
+\usepackage{indentfirst} % 首段缩进
+\usepackage{thesis_cx}
+\usepackage{natbib}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{algorithm} % 算法排版
+\usepackage{algpseudocode}
+\usepackage{multirow}
+\usepackage{titletoc}
+\usepackage{float}
+
+% \usepackage{subfigure}
+\usepackage{subfig}
+\usepackage{tikz}
+\usetikzlibrary{fit,positioning}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+
+%-----------------设置字体-------------------
+%\setCJKmainfont{SimSun}
+%\setCJKmainfont[BoldFont={STHeiti},ItalicFont=STKaiti]{STSong}
+
+\newcommand{\tn}{\tabularnewline} %表格
+
+
+
+\begin{document}
+\includepdf{cover.pdf}
+
+\pagenumbering{roman}
+
+\newpage
+\begin{titlepage}
+\vspace*{120pt}
+\centerline{\Huge 指导小组成员名单}
+\vspace*{60pt}
+\centerline{\Large 周水庚 \hspace*{10pt} 教授}
+\end{titlepage}
+
+%\song
+\lhead{复旦大学硕士学位论文}
+\rhead{目录}
+
+%\song
+\tableofcontents
+\newpage
+
+\pagenumbering{arabic}
+%\song
+
+\include{abstract}
+\include{eabstract}
+\newpage
+
+%\include{introduction}
+%\include{review}
+%\include{mywork}
+%\include{experiment}
+%\include{conclusion}
+\song
+\rhead{参考文献}
+\addcontentsline{toc}{chapter}{参考文献}
+
+\bibliographystyle{unsrt} %引用方式
+\bibliography{cite}
+%\include{paper}
+\include{thanks}
+\end{document}

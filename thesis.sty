@@ -1,0 +1,70 @@
+\usepackage{CJK}
+\usepackage{CJKpunct}
+\usepackage{CJKnumb}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{indentfirst}
+\usepackage{titletoc}
+
+\DeclareFontFamily{C19}{song}{}
+\DeclareFontShape{C19}{song}{m}{n}{<-> CJK * gbksong}{}
+\DeclareFontShape{C19}{song}{bx}{n}{<-> CJKb * gbkhei}{}
+\DeclareFontShape{C19}{song}{m}{it}{<-> CJK * gbksongsl}{}
+\DeclareFontShape{C19}{song}{bx}{it}{<-> CJKb * gbkheisl}{}
+\DeclareFontShape{C19}{song}{m}{sl}{<-> CJK * gbksongsl}{}
+\DeclareFontShape{C19}{song}{bx}{sl}{<-> CJKb * gbkheisl}{}
+
+\newcommand{\song}{\CJKfamily{song}}
+\newcommand{\hei}{\CJKfamily{hei}}
+\newcommand{\kai}{\CJKfamily{kai}}
+\newcommand{\fs}{\CJKfamily{fs}}
+
+
+
+\parskip 1.0ex plus 0.5ex minus 0.5ex  % ������������
+\renewcommand{\baselinestretch}{1.3}   % �����м���
+
+\begin{CJK*}{GBK}{song}
+\end{CJK*}
+\renewcommand\contentsname{\hei{Ŀ¼}}
+\renewcommand\figurename{\hei{ͼ}}
+\renewcommand\tablename{\hei{��}}
+\renewcommand\bibname{\hei{�ο�����}}
+\renewcommand\listtablename{\hei{��Ŀ¼}}
+\renewcommand\listfigurename{\hei{ͼĿ¼}}
+
+
+\newtheorem{thm}{\hei{����}}[chapter]%
+\newtheorem{cor}[thm]{\hei{����}}%
+\newtheorem{lem}{\hei{����}}[chapter]%
+\newtheorem{prop}{\hei{����}}[chapter]%
+\newtheorem{defn}{\hei{����}}[chapter]%
+\newtheorem{exam}{\hei{��}}[chapter] %
+
+
+\newenvironment{proof}{\begin{sloppypar}\setlength{\baselineskip}{2.5em} \noindent\hei{֤����}}{\hfill$\blacksquare$\vspace{1ex}\end{sloppypar}}
+
+\titleformat{\chapter}[hang]{\centering\LARGE\bfseries}{\chaptername}{1em}{}
+\renewcommand{\chaptername}{��\CJKnumber{\thechapter}��}
+%-------------------- Ŀ¼��ʽ ----------------------------------------
+\titlecontents{chapter}[0pt]{\vspace{.1\baselineskip}\bfseries}
+    {��\CJKnumber{\thecontentslabel}��\quad}{}
+    {\hspace{.5em}\titlerule*[10pt]{$\cdot$}\contentspage}
+
+
+%-------------------- ����ҳü��ҳ�� ʹ��fancyhdr ���� -----------------%
+% ����ҳü�����ļ�˫����
+\newcommand{\makeheadrule}{%
+    \makebox[0pt][l]{\rule[.7\baselineskip]{\headwidth}{0.3pt}}%0.4
+    \rule[0.85\baselineskip]{\headwidth}{1.5pt}\vskip-.8\baselineskip}%1.5 0.4->0.5
+\makeatletter
+\renewcommand{\headrule}{%
+    {\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
+     \makeheadrule}}
+\pagestyle{fancyplain}
+\fancyhf{}
+%\rhead{\bfseries \chaptername}
+\rfoot{\thepage}
+
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername \ #1}{}}
+\fancyhead[RO,RE]{\CJKfamily{song}\leftmark}% \leftmark�Զ���¼����֮����,

@@ -1,0 +1,12 @@
+\chapter*{摘要}
+\addcontentsline{toc}{chapter}{摘要}
+\rhead{摘要}
+生物蛋白质相互作用网络，简称PPI网络(protein-protein interaction networks)，是一种生物信息学中用来表示蛋白质之间相互作用关系的图模型，通过对PPI网络进行分析，可以得到许多和该生物的蛋白质相关的信息。而通过对不同物种间PPI网络进行网络匹配(alignment of PPI networks)的方法，则可以将一种生物PPI网络中已建立起的知识体系，转移到另一种未建立完整知识体系的生物PPI网络中。而其中，PPI网络匹配算法的好坏则起到了举足轻重的作用。
+
+另一方面，由于大量基因表达数据(gene expression data)的存在，动态PPI网络的概念(dynamic protein-protein networks)被提出，这对既有的静态PPI网络匹配算法来说无疑是一种新的挑战。对于现有的匹配算法，环境从原来的静态PPI网络，变成了动态PPI网络，那么无论是匹配的概念，亦或是匹配好坏的衡量标准(measure alignment quality)，都需要在动态PPI网络这一新环境下重新定义。
+
+本文提出了动态PPI网络匹配的概念(alignment of dynamic PPI networks)，定义了动态PPI网络匹配的问题和衡量标准，并且设计了一种在该问题下，能够提高既有静态PPI网络匹配算法在动态PPI网络中匹配效果的算法SGOPT(SeGment tree OPTimization)。SGOPT算法可以在既有静态匹配算法的基础上，通过一种局部调整的策略，利用线段树(segment tree)来高效地维护动态PPI网络中的匹配结果。SGOPT算法最终能够产生比既有静态PPI网络匹配算法更好的匹配效果，本文通过实验证明了其优势。
+
+
+\noindent{\bf 关键词}：蛋白质相互作用网络，PPI，PPI网络匹配，PPI网络匹配算法，动态PPI网络，线段树，SGOPT
+

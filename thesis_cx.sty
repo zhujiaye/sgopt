@@ -1,0 +1,64 @@
+\usepackage[slantfont,boldfont]{xeCJK}
+\usepackage{CJKpunct}
+\usepackage{xCJKnumb}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{indentfirst}
+\usepackage{titletoc}
+
+
+\newcommand{\song}{\CJKfamily{SimSun}}
+\newcommand{\hei}{\CJKfamily{SimHei}}
+\newcommand{\kai}{\CJKfamily{KaiTi}}
+%\newcommand{\fs}{\CJKfamily{fs}}
+
+
+
+\parskip 1.0ex plus 0.5ex minus 0.5ex  % 调整段落间距
+\renewcommand{\baselinestretch}{1.5}   % 调整行间距
+
+
+\renewcommand\contentsname{\hei{目录}}
+\renewcommand\figurename{\hei{图}}
+\renewcommand\tablename{\hei{表}}
+\renewcommand\bibname{\hei{参考文献}}
+\renewcommand\listtablename{\hei{表目录}}
+\renewcommand\listfigurename{\hei{图目录}}
+
+
+\newtheorem{thm}{\hei{定理}}[chapter]%
+\newtheorem{cor}[thm]{\hei{推论}}%
+\newtheorem{lem}{\hei{引理}}[chapter]%
+\newtheorem{prop}{\hei{命题}}[chapter]%
+\newtheorem{defn}{\hei{定义}}[chapter]%
+\newtheorem{exam}{\hei{例}}[chapter] %
+
+
+\newenvironment{proof}{\begin{sloppypar}\setlength{\baselineskip}{2.5em} \noindent\hei{证明：}}{\hfill$\blacksquare$\vspace{1ex}\end{sloppypar}}
+
+\titleformat{\chapter}[hang]{\centering\LARGE\bfseries}{\chaptername}{1em}{}
+\renewcommand{\chaptername}{第~\xCJKnumber{\thechapter}~章}
+%-------------------- 目录格式 ----------------------------------------
+\titlecontents{chapter}[0pt]{\vspace{.1\baselineskip}\bfseries}
+    {第\xCJKnumber{\thecontentslabel}章\quad}{}
+    {\hspace{.5em}\titlerule*[10pt]{$\cdot$}\contentspage}
+
+
+%-------------------- 定义页眉和页脚 使用fancyhdr 宏包 -----------------%
+% 定义页眉与正文间双隔线
+\newcommand{\makeheadrule}{%
+    \makebox[0pt][l]{\rule[.7\baselineskip]{\headwidth}{0.3pt}}%0.4
+    \rule[0.85\baselineskip]{\headwidth}{1.5pt}\vskip-.8\baselineskip}%1.5 0.4->0.5
+\makeatletter
+\renewcommand{\headrule}{%
+    {\if@fancyplain\let\headrulewidth\plainheadrulewidth\fi
+     \makeheadrule}}
+     
+ %\pagestyle{fancy}  
+\pagestyle{fancyplain}
+\fancyhf{}
+%\rhead{\bfseries \chaptername}
+\cfoot{\thepage}
+
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername \ #1}{}}
+%\fancyhead[RO,RE]{\CJKfamily{SimSun}\leftmark}% \leftmark自动存录各章之章名,
