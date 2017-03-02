@@ -1,27 +1,75 @@
-\rhead{相关概念与相关工作介绍}
-\chapter{相关概念与相关工作介绍}
+\rhead{相关概念与相关工作}
+\chapter{相关概念与相关工作}
 
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-\section{相关概念介绍}
+\section{相关概念}
 本章主要对本文中经常出现的一些概念作相关介绍以及形式化的定义。
 
 \subsection{PPI网络}
-蛋白质相互作用网络(protein-protein interaction networks)，简称PPI网络，是一种生物体内表示蛋白质相互之间作用的图论模型。定义图$G=(V,E)$为一个PPI网络，其中$V$是点集，其中每个点$v\in V$代表一种蛋白质，$E$是一个$V×V$的边集，一条边$(u,v)\in E$代表蛋白质$u$和$v$具有相互作用。由定义可知$G$是一个\textbf{无权无向图}。
+
+
+蛋白质相互作用网络(protein-protein interaction networks)，简称PPI网络，是一种生物体内表示蛋白质相互之间作用的图论模型。
+\begin{defn}[PPI网络]
+\label{defnppi}
+图$G=(V,E)$为一个\textbf{PPI网络}，其中$V$是点集，其中每个点$v\in V$代表一种蛋白质，$E$是一个$V×V$的边集，一条边$(u,v)\in E$代表蛋白质$u$和$v$具有相互作用。
+\end{defn}
+由定义\ref{defnppi}可知$G$是一个\textbf{无权无向图}。
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-\subsection{全局网络匹配}
-全局网络匹配(global network alignment)是对两个PPI网络$G_1(V_1,E_1)$，$G_2(V_2,E_2)$进行匹配的过程，不失一般性，$|V_1|\leq|V_2|$，并且称$G_1$为源网络(source network)，$G_2$为目标网络(target network)。定义两个PPI网络$G_1,G_2$的匹配是一个从$V_1$到$V_2$的\textbf{单射}$f:V_1\rightarrow V_2$。在全局网络匹配$f$下，令$v_1\in V_1$为图$G_1$中的一个点，则$f(v_1)\in V_2$，是$v_1$在$G_2$中对应的匹配点，称$(v1,f(v1))$为一对\text{匹配点对}。由单射的定义，$G_1$的每个点都对应$G_2$中不同的点。令$f^{-1}$为$f$的反函数，由于$|V_1|\leq|V_2|$，$G_2$中可能存在没有被$G_1$中匹配到的点，可用$f^{-1}(v)=undefined$来表示。
+\subsection{全局网络比对}
+全局网络比对(global network alignment)是对两个PPI网络进行比对的过程，其本质是对两个PPI网络的点集进行匹配的过程。
 
-在匹配$f$下，如果有一条源网络中的边$(u,v)\in E_1$满足$(f(u),f(v))\in E_2$，则称边$(u,v)$在$f$下是被保留(匹配)的边(conserved edge)。
+\begin{defn}[全局网络比对]
+\label{defngna}
+两个PPI网络$G_1(V_1,E_1),G_2(V_2,E_2)$的\textbf{全局网络比对}(不失一般性，$|V_1|\leq|V_2|$)是一个从点集$V_1$到点集$V_2$的\textbf{单射}$f:V_1\rightarrow V_2$。在全局网络比对$f$下，令$v_1\in V_1$为图$G_1$中的一个点，$f(v_1)\in V_2$，称为$v_1$在$G_2$中对应的\textbf{匹配点}，同理$v_1$也是$f(v_1)$对应的匹配点。称$(v_1,f(v_1))$为一对\textbf{匹配点对}。$f(V_1)=\left\{f(v)\in V_2:v\in V_1\right\}$是$G_1$中所有点在$G_2$中的匹配点组成的集合，称为$G_2$在$f$下的\textbf{匹配点集}。称$G_1$为\textbf{源网络}(source network)，$G_2$为\textbf{目标网络}(target network)。
+\end{defn}
+由于本文研究的重点是全局网络比对，因此下文为了叙述简便，简称全局网络比对为\textbf{比对}。
 
-令$X\subseteq V$，则$G[X]$表示图$G$中点集$X$的导出子图(induced subgraph)，且$E(G[X])=\{(u,v):u\in X,v\in X,(u,v)\in E\}$表示该导出子图的边集合。
+由定义\ref{defngna}可知，一个比对便是$G_1$中所有点和其在$G_2$中对应的匹配点组成的匹配点对的集合。由单射的定义，$G_1$的每个点都对应$G_2$中不同的点。令$f^{-1}$为$f$的反函数，由于$|V_1|\leq|V_2|$，$G_2$中可能存在没有被$G_1$中匹配到的点$v$，即$f^{-1}(v)=undefined$。
 
-令$f(E_1)=\left \{(f(u),f(v))\in E_2:(u,v)\in E_1\right \}$，$f(V_1)=\left\{f(v)\in V_2:v\in V_1\right\}$。称$f(E_1)$为边集$E_1$在匹配$f$下的保留(匹配)边集合。它的大小衡量了$E_1$中的边在匹配后被保留下来的数量。而$f(V_1)$则是$G_2$中被匹配的点组成的集合，称为\textbf{匹配点集}。
+\begin{defn}[部分比对]
+\label{defnpa}
+两个PPI网络$G_1(V_1,E_1),G_2(V_2,E_2)$的\textbf{部分比对}是一个从点集$V_1$到点集$V_2$的\textbf{映射}:$fp:V_1\rightarrow V_2$满足$\forall v_1,v_2\in V_1,fp(v_1)\neq fp(v_2)$。且在部分比对$fp$下，$G_1$和$G_2$中都可能存在没有得到匹配的点。
+\end{defn}
 
-如何衡量一个匹配的好坏，是网络匹配中一个重要的问题，因此存在许多种不同的\textbf{网络匹配衡量指标}(alignment quality measure)。
-$$EC(f)=\frac{\left | f(E_1) \right |}{\left | E_1 \right |}\cite{kuchaiev2010topological}$$表示源网络$G_1$中在匹配$f$下，$E_1$中被保留下来的边数的比例，是最为常见的衡量指标。但是由于只考虑是源网络边的保留比例，在源网络是稀疏网络，目标网络是稠密网络的情况下，该指标的值会接近于1，但是并不能说明匹配的效果(虽然源网络中多数边都被保留了下来，但是目标网络中有大量的边并没有被匹配到)。
-$$ICS(f)=\frac{\left | f(E_1) \right |}{\left |E_2(G_2[f(V_1)])\right |}\cite{patro2012global}$$则表示在匹配$f$下，$E_1$中被保留下来的边的数量在$G_2$中匹配点集的引导子图的边集中，所占的比例，也就是$G_2$中，被匹配点集$f(V_1)$形成的导出子图的边集中，在匹配$f$下，被匹配到的边的比例。可见与EC指标的定义恰好相反。该指标在源网络是稠密网络，目标网络是稀疏网络的时候，不能体现很好的效果。
-$$TWEC(f)=\frac{EC(f)+ICS(f)}{2}\cite{dopmann2013survey}$$则平均了上面两个指标，一定程度上缓解了极端情况下衡量效果不好的情况。
-$$S^{3}(f)=\frac{\left | f(E_1) \right |}{\left | E_1 \right |+\left | E_2(G_2[f(V_1)]) \right |-\left | f(E_1) \right |}\cite{saraph2014magna}$$则同时考虑了源网络和目标网络，相对EC和ICS来说是一个更好的指标。图\ref{fig:measure}展示了一个计算全局网络匹配不同衡量标准的例子。
+由于比对和部分比对只是单射与否的区别，下文叙述时，不再区分比对与部分比对，统一用比对来表示$V_1$到$V_2$的映射关系。
+
+无论是比对，还是部分比对，其实质，都是对$V_1$和$V_2$点集进行匹配的过程。我们可以将一个比对(单射或部分比对)看成一对对匹配点对组成的集合。
+
+\begin{defn}[比对集合]
+\label{defnas}
+一个比对$f$的\textbf{比对集合}为$set(f)=\{(v,f(v)):v\in V_1,f(v)\in V_2\}$。对于$V_1$中的一个点v，如果$f(v)\in V_2$，即v是已经被匹配的点，则称点v\textbf{属于}比对集合$set(f)$，用$v\in set(f)$来表示，对于$V_2$中的点也是同理。如果一个点对$(v_1,v_2),v_1\in V_1,v_2\in V_2$是一个匹配点对($f(v_1)=v_2$)，则$(v_1,v_2)\in set(f)$，否则$(v_1,v_2)\notin set(f)$。
+\end{defn}
+
+由定义\ref{defnas}可知，比对集合与比对是一一对应的，一个比对对应一个比对集合，而一个比对集合，也代表了一个比对。所以为了构造一个比对，只要构造出对应的比对集合即可。
+
+\begin{defn}[保留边，映射边]
+\label{defnce}
+在比对$f$下，对于一条源网络$G_1$中的边$(u,v)\in E_1$，如果有$(f(u),f(v))\in E_2$，则称边$(u,v)$在$f$下是被保留的边，简称\textbf{保留边}(conserved edge)。并且称其在$G_2$中对应的边$(f(u),f(v))$为\textbf{映射边}。则$f(E_1)=\left \{(f(u),f(v))\in E_2:(u,v)\in E_1\right \}$称为$E_1$在$G_2$中的\textbf{映射边集合}。
+\end{defn}
+
+\begin{defn}
+对于一个图$G(V,E)$，有一个点集$V$的子集$X\subseteq V$，令$G[X]$为图$G$中点集$X$的导出子图(induced subgraph)，即$G[X]=(X,E(G[X]))$，其中边集为$E(G[X])=\{(u,v):u\in X,v\in X,(u,v)\in E\}$。
+\end{defn}
+
+由定义\ref{defnce}可知，映射边和保留边是一一对应的，所以两个集合的大小相同。$f(E_1)$的大小衡量了$E_1$中的边在比对后被保留下来的数量。
+
+如何衡量一个比对的好坏，是网络比对中一个重要的问题。目前为止，存在许多种不同的\textbf{网络比对衡量指标}(alignment quality measure)，常见的有
+\begin{equation*}
+EC(f)=\frac{\left | f(E_1) \right |}{\left | E_1 \right |}\cite{kuchaiev2010topological}
+\end{equation*}
+表示源网络$G_1$中在比对$f$下，$G_1$中的\textbf{保留边比例}，是最为常见的衡量指标。但是由于只考虑源网络边的保留比例，在源网络是稀疏网络，目标网络是稠密网络的情况下，EC指标的值会接近于1($G_1$中保留边的比例高，$G_2[f(V_1)]$中的映射边的比例低)，但是并不能说明比对的效果。
+\begin{equation*}
+ICS(f)=\frac{\left | f(E_1) \right |}{\left |E_2(G_2[f(V_1)])\right |}\cite{patro2012global}
+\end{equation*}
+则表示在比对$f$下，$G_2[f(V_1)]$中的\textbf{映射边比例}。与EC指标恰好相反，该指标在源网络是稠密网络，目标网络是稀疏网络的时候($G_1$中保留边的比例低，$G_2[f(V_1)]$中的映射边的比例高)，不能体现很好的效果。
+\begin{equation*}
+TWEC(f)=\frac{EC(f)+ICS(f)}{2}\cite{dopmann2013survey}
+\end{equation*}
+是EC指标和ICS指标的平均值，一定程度上缓解了极端情况下衡量效果不好的情况。
+\begin{equation*}
+S^{3}(f)=\frac{\left | f(E_1) \right |}{\left | E_1 \right |+\left | E_2(G_2[f(V_1)]) \right |-\left | f(E_1) \right |}\cite{saraph2014magna}
+\end{equation*}
+则同时考虑了源网络和目标网络，相对EC和ICS来说是一个更综合性的指标。图\ref{fig:measure}展示了一个计算全局网络比对不同衡量指标的例子。
 
 \begin{figure}[htbp]
 \centering
@@ -30,12 +78,21 @@ $$S^{3}(f)=\frac{\left | f(E_1) \right |}{\left | E_1 \right |+\left | E_2(G_2[f
 \caption{$G$为源网络，$H$为目标网络，其中各项指标的值分别为$EC=4/5=0.8,ICS=4/5=0.8,TWEC=0.8,S^3=4/6=0.67$ \cite{saraph2014magna} \label{fig:measure}}
 \end{figure}
 
+有了比对的概念和比对衡量指标的概念，就可以定义两个PPI网络的比对问题了。
+
+\begin{prob}[PPI网络比对问题]
+\label{probgna}
+对于两个PPI网络$G_1(V_1,E_1),G_2(V_2,E_2)$，以及一个比对衡量标准$Q$，要求一个全局比对$f$，使得在比对$f$下，$Q$的指标最大化。
+\end{prob}
+
+问题\ref{probgna}是NP-完全的，所以现有的比对算法都是基于启发式的算法。
+
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-\section{相关工作介绍}
-到目前为止，有很多PPI网络的全局匹配算法，本文首先对主要对其中四种经典的算法进行简单的介绍，然后则介绍近年来一些文章构建动态PPI网络的方法。
+\section{相关工作}
+到目前为止，有很多PPI网络的全局比对算法，本文首先对主要对其中四种经典的算法进行简单的介绍，然后则介绍近年来一些文章构建动态PPI网络的方法。
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \subsection{IsoRank算法}
-IsoRank是全局网络匹配问题中被提出的第一个具有开拓性意义的算法。它主要分为两步。
+IsoRank是全局网络比对问题中被提出的第一个具有开拓性意义的算法。它主要分为两步。
 第一步，IsoRank算法计算源网络$G_1$和目标网络$G_2$之间任意点对之间的相似性，用一个分数$R_{ij},i\in V_1,j\in V_2$来表示。IsoRank算法借鉴了Google的PageRank算法，任意点对$(i,j)$之间的值由$i$和$j$两个点的所有邻居节点的值所决定。见公式\ref{isorank1}的定义。
 
 \begin{equation}\label{isorank1}
@@ -59,8 +116,9 @@ R(k+1)\leftarrow AR(k)/\left \|AR(k)\right \|
 \end{equation}
 当$\left \|R(k+1)-R(k)\right \|\rightarrow 0$时即可终止迭代。
 
-有了$R$，第二步，就是IsoRank算法构造匹配的过程。IsoRank不断按分数从大到小挑选考查点对$(i,j)$的情况，如果当前的点对$i$和$j$都没有被匹配过($f(i)=undefined,f^{-1}(j)=undefined$)，则将点对$(i,j)$作为新的\textbf{匹配点对}加入最终的匹配结果，直到不能挑出符合条件的点对为止。
-IsoRank可以说是全局网络匹配算法中的一个经典算法，其经典之处在于两步走的解决问题的框架。\textbf{第一步}，定义点对之间的相似度，\textbf{第二步}，根据相似度按某种策略不断产生匹配点对，这一解决问题的思路为之后不少的全局网络匹配算法所采用，具有很高的开创性意义。
+有了$R$，第二步，就是IsoRank算法构造比对集合$set(f)$的过程。一开始，$set(f)=\emptyset$。随着算法的进行，$set(f)$不断加入新的匹配点对。IsoRank挑选满足条件的点对$(i,j),i\notin set(f),j\notin set(f)$中分数最大的点对，将其作为新的\textbf{匹配点对}加入$set(f)$，直到不能挑出符合条件的点对为止。
+
+IsoRank可以说是全局网络比对算法中的一个经典算法，其经典之处在于两步走的解决问题的框架。\textbf{第一步}，定义点对之间的相似度，\textbf{第二步}，根据相似度按某种策略不断产生匹配点对，这一解决问题的思路为之后不少的全局网络比对算法所采用，具有开创性意义。
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \subsection{GRAAL算法}
 GRAAL算法(GRAph ALigner)是一系列算法的总称，第一个提出的算法为GRAAL\cite{kuchaiev2010topological}，而最近刚提出的算法为L-GRAAL\cite{malod2015graal}。这一系列算法的共同点是都使用了一种叫\textbf{小图度数}(graphlet degree)的特征作为网络中一个点的拓扑结构的度量，并且基于该度量，定义了两个不同的网络的点对之间的相似度。
@@ -97,9 +155,9 @@ D_i(u,v)=\frac{w_i*\left | log(u_i+1)-log(v_i+1) \right |}{log(max\{u_i,v_i\}+2)
 
 $u_i$和$v_i$分别是点$u$小图度数和点$v$小图度数的第$i$维向量值，$w_i$是和第$i$个orbit相关的一个权重。
 
-在有了相似度函数以后，GRAAL也和IsoRank一样，通过相似度函数，设计了一种生成匹配点对的策略。然而不同于IsoRank的策略，GRAAL采取的策略是，每次挑选出一对还没匹配过的点对$(i,j)$，称为种子点对(seed pair)，然后考查任意一对由$i$的邻居点集$N(i)$的点和$j$的邻居点集$N(j)$中的点组成的点对$(u,v),u\in N(i),v\in N(j)$。将这些考查的点对根据相似度大小贪心的进行匹配，当不存在能匹配的点对的时候，GRAAL才继续寻找下一个种子点对，这是和IsoRank不同的地方。可以说GRAAL算法寻找匹配的策略是先全局，再局部的策略。
+在有了相似度函数以后，GRAAL也和IsoRank一样，通过相似度函数，设计了一种构造比对集合$set(f)$的策略。然而不同于IsoRank的策略，GRAAL采取的策略是，每次挑选出分数最大的点对$(i,j),i\notin set(f),j\notin set(f)$，称为种子点对(seed pair)，将种子点对先加入$set(f)$。然后考查任意一对由$i$的邻居点集$N(i)$的点和$j$的邻居点集$N(j)$中的点组成的点对$(u,v),u\in N(i),v\in N(j),u\notin set(f),v\notin set(f)$。将这些考查的点对根据相似度大小贪心的加入$set(f)$，当不存在能匹配的点对的时候，GRAAL才继续寻找下一个种子点对，这是和IsoRank不同的地方。可以说GRAAL算法生成匹配点对的策略是先全局，再局部的策略。
 
-GRAAL系列之后又出现了H-GRAAL\cite{milenkovic2010optimal}，MI-GRAAL\cite{kuchaiev2011integrative},C-GRAAL\cite{memivsevic2012c}和L-GRAAL\cite{malod2015graal}。而最近提出的L-GRAAL\cite{malod2015graal}算法，通过解线性规划的问题来进行匹配，显示出了极好的匹配效果。
+GRAAL系列之后又出现了H-GRAAL\cite{milenkovic2010optimal}，MI-GRAAL\cite{kuchaiev2011integrative},C-GRAAL\cite{memivsevic2012c}和L-GRAAL\cite{malod2015graal}。而最近提出的L-GRAAL\cite{malod2015graal}算法，通过解线性规划的问题来进行网络比对，显示出了极好的比对效果。
 
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \subsection{SPINAL算法}
@@ -111,7 +169,7 @@ P(i,j)=DegDiff(i,j)
 
 每一轮迭代，$P(i,j)$的值由i和j的邻居点集$N(i)$和$N(j)$决定，但是SPINAL算法采用了与IsoRank算法不同的计算公式。
 
-定义$NBG(\left \{ \left \langle i,j \right \rangle \right \},P)$为一个\textbf{二分图}(bipartite graph)，其中二分图左边的顶点集合$X$由点$i$的邻居集合$N(i)$构成($X=N(i)$)，右边的顶点集合$Y$由点$j$的邻居集合$N(j)$构成($Y=N(j)$)，任意一条二分图中的边$(x,y)\in NBG,x\in X,y\in Y$，边权$w(x,)=P(x,y)$。
+定义$NBG(\left \{ \left \langle i,j \right \rangle \right \},P)$为一个\textbf{二分图}(bipartite graph)，其中二分图左边的顶点集合$X$由点$i$的邻居集合$N(i)$去掉那些已经被匹配的点构成($X=\{x:x\in N(i),x\notin set(f)\}$)，右边的顶点集合$Y$同理($Y=\{y:y\in N(j),y\notin set(f)\}$)，任意一条二分图中的边$(x,y)\in NBG,x\in X,y\in Y$，边权$w(x,y)=P(x,y)$。
 
 每一轮迭代更新点对$(i,j)$，SPINAL算法使用不同于IsoRank算法的计算方法：首先构造出二分图$NBG(\left \{ \left \langle i,j \right \rangle \right \},P)$，然后得到$NBG$的\textbf{最大权值匹配}(maximum weighted bipartite matching)。令得到的匹配边集合为$C$，称为贡献者集合(contributors set)，则新的$P(i,j)$值为
 
@@ -120,30 +178,35 @@ P(i,j)=\frac{\sum_{(x_i,y_j)\in C}\frac{P(x_i,y_j)}{deg(x_i)*deg(y_j)}}{\sqrt{\l
 \end{equation}
 若干轮迭代后，就能得到最后的相似度矩阵$P$了。
 
-SPINAL算法的第二步则是基于$P$矩阵的值，产生匹配点对的过程，和GRAAL算法类似。SPINAL先将所以的匹配点对按照$P$值从大到小排序，每次挑选出一对还未得到匹配的种子点对$(i,j)$，然后构造二分图$NBG(\left \{ \left \langle i,j \right \rangle \right \},P)$，求出该二分图的最大权值匹配边集合$M$。之后，SPINAL会重新依次检查二分图中的每一条非匹配边（不在集合$M$中），看看是否能够通过交换这条非匹配边与$M$中的匹配边得到更优的匹配。这相当于是一个局部调优的过程。经过调优过程以后，将得到的所有的匹配边，都当做是新的匹配点对加入到当前的匹配点对集合中。然后再去寻找新的满足条件的种子点对，进行下一轮的局部调优过程，直到不存在种子点对为止。
+SPINAL算法的第二步则是基于$P$矩阵的值，构造比对集合$set(f)$的过程，和GRAAL算法类似。SPINAL先将所有的点对按照$P$值从大到小排序，每次挑选出一对种子点对$(i,j)$，然后构造二分图$NBG(\left \{ \left \langle i,j \right \rangle \right \},P)$，求出该二分图的最大权值匹配边集合$M$。之后，SPINAL会重新依次检查二分图中的每一条非匹配边（不在集合$M$中），看看是否能够通过交换这条非匹配边与$M$中的匹配边得到更优的匹配。这相当于是一个局部调优的过程。经过调优过程以后，将得到的所有的匹配边，都当做是新的匹配点对加入到当前的$set(f)$中。然后再去寻找新的满足条件的种子点对，进行下一轮的局部调优过程，直到不存在种子点对为止。
 
-SPINAL算法的精髓在于将匹配点对的邻居之间的关系用二分图最大权值匹配这一模型表达了出来，同时利用局部调优的策略来产生更好的解。
+SPINAL算法的精髓在于将匹配点对的邻居之间的关系用二分图最大权值匹配这一模型表达了出来，同时利用局部调优的策略来产生更好的比对集合。
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \subsection{PROPER算法}
-PROPER算法(PROtein-protein interaction network alignment based on PERcolatin)\cite{kazemi2016proper}是一种基于\textbf{图渗透}的PPI网络匹配算法。不同于之前三个算法的是，PROPER算法并没有将过多的重点放在计算两个网络之间任意点对之间的相似度上。PROPER算法对于两个待匹配的PPI网络，用点对所代表的蛋白质间的BLAST分数\cite{altschul1990basic}(一种衡量蛋白质序列之间相似度的分数)作为这两个网络任意点对之间的相似度函数，即
+PROPER算法(PROtein-protein interaction network alignment based on PERcolatin)\cite{kazemi2016proper}是一种基于\textbf{图渗透}的PPI网络比对算法。不同于之前三个算法的是，PROPER算法并没有将过多的重点放在计算两个网络之间任意点对之间的相似度上。PROPER算法对于两个待比对的PPI网络，用点对所代表的蛋白质间的BLAST分数\cite{altschul1990basic}(一种衡量蛋白质序列之间相似度的分数)作为这两个网络任意点对之间的相似度函数，即
 
 \begin{equation}\label{proper1}
 S(i,j)=BLAST\_SCORE(i,j)
 \end{equation}
 
-PROPER算法认为，当两个蛋白质的BLAST分数较大的时候，意味着它们之间的序列相似度很高，那么这两个蛋白质，在它们的功能表达上，相似的概率也应该是很大的，虽然像之前说的，考虑到蛋白质之间的相互作用，光是序列的相似性，并不能代表它们在网络中和其他蛋白质相互作用的相似性，但是PROPER认为，如果这样的相似度高于一个阈值，则可以认为它们在PPI网络中，也拥有相似度极高的网络结构，因此，可以先找出所有这样的点对，将它们进行匹配，产生一个点对匹配的集合，也略去了利用网络结构计算点对间相似性的过程。这也是PROPER算法的第一步。而PROPER算法的精髓在其第二步。
+PROPER算法认为，当两个蛋白质的BLAST分数较大的时候，意味着它们之间的序列相似度很高，那么这两个蛋白质，在它们的功能表达上，相似的概率也应该是很大的，虽然像之前说的，考虑到蛋白质之间的相互作用，光是序列的相似性，并不能代表它们在网络中和其他蛋白质相互作用的相似性，但是PROPER认为，如果这样的相似度高于一个阈值，则可以认为它们在PPI网络中，也拥有相似度极高的网络结构，因此，可以先找出所有这样的点对，将它们进行匹配，产生一个比对集合$set(f)$，也略去了利用网络结构计算点对间相似性的过程。这也是PROPER算法的第一步。而PROPER算法的精髓在其第二步。
 
-PROPER算法的第一步，如前文所说，按照BLAST分数作为相似度衡量指标，将所以待匹配点对按值从大到小进行排序。然后依次考虑每一对待匹配的点对$(i,j):S(i,j)\geq l$，将$(i,j)$加入集合$A$，直到没有符合条件的点对为止。最后得到的集合$A$就是PROPER算法第一步产生的匹配点对集合。
+PROPER算法的第一步，如前文所说，按照BLAST分数作为相似度衡量指标，一开始，$set(f)=\emptyset$，然后将所有点对按相似度从大到小进行排序。每次挑选出一对种子点对$(i,j)，S(i,j)\geq l$，将$(i,j)$加入$set(f)$，直到没有符合条件的点对为止。最后得到的集合$set(f)$就是PROPER算法第一步产生的比对集合。
 
-$l$是PROPER算法第一步的一个参数，阈值$l$越小，满足条件的待匹配点对便越多，第一步中被加入$A$的匹配点对就越多。也就是说，第一步产生的匹配只是部分匹配，而其大小则取决于参数$l$的值。
+$l$是PROPER算法第一步的一个参数，阈值$l$越小，满足条件的点对便越多，第一步中被加入$set(f)$的匹配点对就越多。也就是说，第一步产生的$set(f)$只是一个部分比对集合，而其大小则取决于参数$l$的值。
 
-PROPER算法的第二步是在第一步结果$A$的基础上，扩展匹配点对的过程（图渗透算法）。定义
-\begin{equation}\label{proper2}
-F_A(i,j)=\left | \{(u,v):u\in N(i),v\in N(j),(u,v)\in A\} \right |
-\end{equation}
-称为点对$(i,j)$在已有匹配$A$下的贡献值。$F_A(i,j)$的实际意义在于，源网络$G_1$在已有匹配$A$的情况下，通过新增一对匹配点对$(i,j)$，此时在新的匹配$A\bigcup \{(i,j)\}$的情况下，$E_1$中能够增加的被匹配(保留)的边数。根据前面定义的四种匹配衡量标准，可以认为$E_1$中被保留的边越多，则匹配越好。PROPER算法的第二步，便是将所有$F_A\geq r$且没有被匹配过的点对，按照$F_A$的值进行排序，挑选其中最好的一对加入集合$A$的过程。在集合$A$变化了以后，所有点对的$F_A$值重新计算，重新排序，重新挑选，这就是图渗透的过程。
+PROPER算法的第二步是扩展比对集合$set(f)$的过程(图渗透算法)。
 
-从PROPER算法的过程可以看到阈值$l$和$r$对PROPER算法有着极为重要的意义和影响，阈值$l$影响集合$A$的大小，而$r$影响的是第二步中可以新加入$A$的匹配点对的数量。因此$l$和$r$分别控制了蛋白质序列相似度和网络结构相似度对整个算法的影响比例。
+\begin{defn}[点对贡献值]
+\label{defnpaircontribute}
+$F_f(i,j)=\left | \{(u,v):u\in N(i),v\in N(j),(u,v)\in set(f)\} \right |$称为点对$(i,j)$在已有比对$f$下的\textbf{贡献值}。
+\end{defn}
+
+由定义\ref{defnpaircontribute}可知，$F_f(i,j)$衡量了往已有比对集合$set(f)$新增一对匹配点对$(i,j)$形成一个新的比对集合$set(f)\bigcup \{(i,j)\}$后，$E_1$中保留边的数量的增长情况。根据前面定义的四种比对衡量标准，可以认为$E_1$中被保留的边越多，则比对效果越好。
+
+PROPER算法的第二步，便是将所有$F_f(i,j)\geq r,i\notin set(f),j\notin set(f)$的点对，按照贡献值进行排序，挑选其中最大的一对作为匹配点对加入集合$set(f)$。在集合$set(f)$变化了以后，所有点对的$F_f$值重新计算，重新排序，重新挑选，这就是图渗透的过程。
+
+从PROPER算法的过程可以看到阈值$l$和$r$对PROPER算法有着极为重要的意义和影响，阈值$l$影响集合$set(f)$的大小，而$r$影响的是第二步中可以新加入$set(f)$的匹配点对的数量。因此$l$和$r$分别控制了蛋白质序列相似度和网络结构相似度对整个算法的影响比例。
 
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \subsection{动态PPI网络生成}

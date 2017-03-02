@@ -1,25 +1,32 @@
 \renewcommand{\algorithmicrequire}{\textbf{Input:}}
 \renewcommand{\algorithmicensure}{\textbf{Output:}}
-\rhead{基于线段树优化的动态PPI网络匹配}
-\chapter{基于线段树优化的动态PPI网络匹配}
+\rhead{基于线段树优化的动态PPI网络比对}
+\chapter{基于线段树优化的动态PPI网络比对}
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-\section{动态PPI网络及动态PPI网络匹配}
-由于本文要研究的问题是如何在动态PPI网络上作网络匹配，因此要先对动态PPI网络以及动态PPI网络匹配问题重新做出定义。
+\section{动态PPI网络及动态PPI网络比对}
+由于本文要研究的问题是如何在动态PPI网络上作网络比对，因此要先对动态PPI网络以及动态PPI网络比对问题重新做出定义。
 
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \subsection{动态PPI网络定义}
 借鉴于\cite{zhang2016method}关于动态PPI网络的定义，本文基于新的问题重新定义了动态PPI网络的概念。
 
-一个动态PPI网络定义为五元组$G=(V,E,L,R,T)$，其中$V$是点集，$E$是边集，对于边集中的每一条边表示为$(u,v)$，其中$u$和$v$是在\textbf{某一时刻}具有相互作用的蛋白质点对(如果$u$和$v$在任意时刻都没有产生相互作用，则不存在$(u,v)$这条边)。$L$和$R$是关于每条边的一个函数，其中$L(u,v)$为边$(u,v)$处于活跃状态的开始时刻，$R(u,v)$为边$(u,v)$处于活跃状态的结束时刻。$T$是时间序列的跨度。$1\leq L(u,v)\leq R(u,v)\leq T$。为了简化问题以及算法的说明，这里假设动态PPI网络中每条边的活跃时刻是一个连续的时间区间。对于多个活跃区间的情况，本文的问题定义和算法也是同样适用的。定义
+\begin{defn}[动态PPI网络]
+\label{defndppi}
+一个\textbf{动态PPI网络}为一个五元组$G=(V,E,L,R,T)$。$T$是一个整数，表示的是整个PPI网络的时间跨度。$V$是点集，$E$是边集，对于边集中的每一条边$(u,v)$，$u$和$v$是在\textbf{某一时刻}具有相互作用的蛋白质点对(如果$u$和$v$在任意时刻都没有产生相互作用，则不存在$(u,v)$这条边)。$L$和$R$是关于边集$E$的一个函数，其中$L(u,v)$为边$(u,v)$处于活跃状态的开始时刻，$R(u,v)$为边$(u,v)$处于活跃状态的结束时刻($1\leq L(u,v)\leq R(u,v)\leq T$)。
+\end{defn}
+为了简化问题以及算法的说明，这里假设动态PPI网络中每条边的活跃时刻是一个连续的时间区间。对于多个活跃区间的情况，本文的问题定义和算法也是同样适用的。
 
-\begin{equation}\label{myworkactivedefine}
-Act_i(u,v)=\begin{cases}
-1 & \text{  } L(u,v)\leq i\leq R(u,v), (u,v)\in E\\ 
-0 & \text{  其他}  
-\end{cases}
-\end{equation}
+\begin{defn}[活跃边集合]
+\label{defnactedge}
+一个动态PPI网络$G$，在某时刻$i$下的\textbf{活跃边集合}为$E_i=\{(u,v):(u,v)\in E,L(u,v)\leq i\leq R(u,v)\}$。
+\end{defn}
 
-用来表示边$(u,v)$在$i$时刻是否处于活跃状态。定义$Act_i(E)=\{(u,v):(u,v)\in E,Act_i(u,v)=1\}$表示$i$时刻下边集E中活跃的边组成的集合。那么一个动态PPI网络，可以看成是T个静态PPI网络组成的集合$\{G_i(V_i,E_i):1\leq i\leq T\}$，$G_i$是$i$时刻下的静态PPI网络，其中$V_i=V$是该静态PPI网络的点集，边集$E_i$即$Act_i(E)$。
+由\ref{defnactedge}可知，动态PPI网络$G$在每个时刻，活跃边的集合都是不一样的。这就是“动态”的意义所在。
+
+\begin{defn}[分时网络]
+\label{defnpartnetwork}
+一个动态PPI网络$G(V,E,L,R,T)$，可以看成是若干个静态PPI网络组成的，表示为$G=[G_1,G_2,...,G_T]$。其中$G_i=(V,E_i)$是一个静态PPI网络，称为$G$在$i$时刻下的\textbf{分时网络}，它是由点集$V$和$i$时刻下$G$的活跃边集合构成的网络。
+\end{defn}
 
 值得注意的是，在\cite{zhang2016method}中，动态PPI网络的定义与本文的定义稍有不同，前者的动态PPI网络中，一条边在某个时刻是否活跃是一个概率，而本文定义的动态PPI网络，在某一时刻，边$(u,v)$要么活跃，要么不活跃，去掉了概率这个因素。
 
@@ -28,171 +35,252 @@ Act_i(u,v)=\begin{cases}
 本文主要用了\cite{zhang2016method}中的三-西格玛阈值方法，对静态PPI网络进行了动态化的转化，由于\cite{zhang2016method}中构造的动态PPI网络，其每条边是否活跃是一个概率值，在本文的工作中，设定阈值0.5，即当边处于活跃状态的概率大于$0.5$时，本文就认为边就是处于活跃状态的，否则就是不活跃状态。详细的动态PPI网络构造方法可以参见相关工作。
 
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-\subsection{动态PPI网络匹配的问题定义}
-本文研究的问题主要是一个静态PPI网络与一个动态PPI网络的匹配，两个动态PPI网络之间的匹配留作未来的研究工作。
+\subsection{动态PPI网络比对}
+本文研究的问题主要是一个静态PPI网络与一个动态PPI网络的比对，两个动态PPI网络之间的比对留作未来的研究工作。
 
-有一个静态PPI网络$G_1=(V_1,E_1)$和一个动态PPI网络$G_2=(V_2,E_2,L,R,T)$，不失一般性的，$|V_1|\leq |V_2|$。定义\textbf{动态PPI网络的匹配}$f:V_1\rightarrow V_2$为点集$V_1$到点集$V_2$的一个单射。可以看到在有动态PPI网络的情况下，匹配的概念依然是和静态PPI网络时是一样的。
+\begin{defn}[动态PPI网络比对]
+\label{defndppigna}
+一个静态PPI网络$SG(SV,SE)$和一个动态PPI网络$DG(DV,DE,L,R,T)$(不失一般性，$|SV|\leq |DV|$)的\textbf{动态PPI网络比对}是一个从点集$SV$到$DV$的\textbf{映射}$f:SV\rightarrow DV,\forall v_1,v_2\in SV,f(v_1)\neq f(v_2)$。如果$SV$中的每个点都被映射了，则$f$是一个\textbf{单射}。
+\end{defn}
 
-在一个动态PPI网络匹配$f$下，对于源网络$G_1$中的任意一条边$(u,v)$，如果在时刻$i$满足$Act_i(f(u),f(v))=1$，则称边$(u,v)$在\textbf{时刻}$\mathbf{i}$是被保留（匹配）的。
+可以看到在有动态PPI网络的情况下，网络比对的概念和静态PPI网络时是一致的。同理，匹配点，匹配点对，比对集合的概念也与静态PPI网络一致，这里就不再作定义，参见相关工作。
 
-同样的，在匹配$f$下，定义$$f_i(E_1)=\{(u,v):(u,v)\in E_1,\text{且}(u,v)\text{在$i$时刻是被保留的}\}$$为源网络边集$E_1$在$i$时刻被保留的边的集合。
+\begin{defn}[保留边，映射边]
+\label{defncedge}
+在一个动态PPI网络比对$f$下，对于源网络$SG$中的任意一条边$(u,v)\in SE$，如果满足$(f(u),f(v))\in DE_i$，则称边$(u,v)$在时刻$i$是被保留的，简称\textbf{保留边}，并且称$i$时刻$DG$中对应的边$(f(u),f(v))$为\textbf{映射边}。$f_i(SE)=\{(f(u),f(v))\in DE_i:(u,v)\in SE\}$称为$SE$在时刻$i$时，在$DG$中的\textbf{映射边集合}。
+\end{defn}
 
-在动态PPI网络的环境下，所有的匹配衡量标准都需要重新定义，我们称这些衡量标准为\textbf{动态匹配衡量标准}(dynamic alignment quality measure)。分别有
-\begin{equation}\label{myworkecdefine}
-    EC(f)=\underset{i}{max}\frac{\left | f_i(E_1) \right |}{\left | E_1 \right |}
-\end{equation}
-衡量了动态PPI网络环境下，源网络$E_1$边集中，\textbf{所有时刻下}，被保留的边的数量占自身边总数的比例的\textbf{最大值}。
+同静态PPI网络比对时类似的，在$i$时刻下，保留边和映射边是一一对应的。
 
-\begin{equation}\label{myworkicsdefine}
-    ICS(f)=\underset{i}{max}\frac{\left | f_i(E_1) \right |}{\left |Act_i(E_2(G_2[f(V_1)]))\right |}
-\end{equation}
+在动态PPI网络的环境下，所有的比对衡量标准都需要重新定义，我们称这些衡量标准为\textbf{动态比对衡量标准}(dynamic alignment quality measure)。
 
-衡量了动态PPI网络环境下，目标网络由点集$f(V_1)$的导出子图在所有时刻下的活跃边中，被匹配到的边的数量占活跃边的总数量的比例的最大值。
+\begin{defn}
+\label{defndec}
+动态PPI网络比对$f$的\textbf{DEC指标}为
+$$DEC(f)=\underset{i}{max}\frac{\left | f_i(SE) \right |}{\left | SE \right |}$$
+\end{defn}
 
-\begin{equation}\label{myworks3define}
-S^{3}(f)=\underset{i}{max}\frac{\left | f_i(E_1) \right |}{\left | E_1 \right |+\left |Act_i(E_2(G_2[f(V_1)])) \right |-\left | f_i(E_1) \right |}
-\end{equation}
-同时考虑了源网络及目标网络。
+DEC指标衡量了动态PPI网络环境下，边集$SE$在\textbf{所有时刻}下的保留边比例的\textbf{最大值}。
 
-\begin{equation}\label{myworktwecdefine}
-    TWEC(f)=\frac{EC(f)+ICS(f)}{2}
-\end{equation}
-则平衡了EC和ICS的指标。
+\begin{defn}
+\label{defndics}
+动态PPI网络比对$f$的\textbf{DICS指标}为$$DICS(f)=\underset{i}{max}\frac{\left | f_i(SE) \right |}{\left |DE_i(DG[f(SV)])\right |}$$
+\end{defn}
 
-可以看到，在动态PPI网络的环境下，所有的衡量标准，都得到了动态化的定义，其本质，就是在匹配$f$下，将动态PPI网络看成若干个静态PPI网络后，将源网络与这些静态PPI网络逐个进行匹配结果衡量，最终选取值最大的结果。
+DICS指标衡量了动态PPI网络环境下，$DG[f(SV)]$在\textbf{所有时刻}下的映射边比例的最大值。
 
-基于动态匹配衡量标准的定义，本文要研究的问题，便是找到一个动态PPI网络匹配$f$使得动态匹配衡量标准最大化，即
-\begin{equation}\label{myworktwobjdefine}
-    objf=\underset{f}{argmax}Q(f)
-\end{equation}
-其中的$Q$可以是上述衡量标准的任意一项。
+\begin{defn}
+\label{defnds3}
+动态PPI网络比对$f$的\textbf{DS}$^3$\textbf{指标}为
+$$DS^{3}(f)=\underset{i}{max}\frac{\left | f_i(SE) \right |}{\left | SE \right |+\left |DE_i(DG[f(SV)]) \right |-\left | f_i(SE) \right |}$$
+\end{defn}
+
+
+\begin{defn}
+\label{defndtwec}
+动态PPI网络比对$f$的\textbf{DTWEC指标}为$$DTWEC(f)=\frac{DEC(f)+DICS(f)}{2}$$
+\end{defn}
+
+可以看到，在动态PPI网络的环境下，所有的衡量标准，都得到了动态化的定义。
+
+最后，给出本文要研究的动态PPI网络比对问题的形式化定义。
+
+\begin{prob}[动态PPI网络比对问题]
+\label{probdgna}
+对于一个静态PPI网络$SG(SV,SE)$和一个动态PPI网络$DG(DV,DE,L,R,T)$，以及一个动态比对衡量标准$Q$，要求一个动态PPI网络比对$f$，使得在比对$f$下，$Q$的指标最大化。
+\end{prob}
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-\section{静态匹配算法的缺陷}
-根据新的动态PPI网络匹配定义以及衡量匹配的标准，是否可以将已有的静态PPI网络匹配算法应用到动态PPI网络匹配这个问题上呢？答案是肯定的，但是缺点就是\textbf{时间}或者\textbf{匹配效果}的下降。本文提供两种解决方案。
+\section{静态比对算法的缺陷}
+根据新的动态PPI网络比对定义以及衡量比对的标准，是否可以将已有的静态PPI网络比对算法应用到动态PPI网络比对这个问题上呢？答案是肯定的，但是缺点就是\textbf{时间}或者\textbf{比对效果}的下降。本文提供两种解决方案。
 
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \subsection{方案一}
-第一种方案，忽略动态PPI网络$G_2$的时间信息，也就是忽略$L,R,T$这三个部分的信息，直接将$G_2(V_2,E_2,L,R,T)$转化成对应的静态PPI网络$G_2(V_2,E_2)$。
+第一种方案，忽略动态PPI网络$DG$的时间信息，也就是忽略$L,R,T$这三个部分的信息，直接将$DG(DV,DE,L,R,T)$转化成一个静态网络$DG(DV,DE)$。
 
-然后，利用已有的静态PPI网络匹配算法对$G_1$和$G_2$进行匹配，令算得的匹配为$f$，并且将其当做最后的结果$objf$。
+然后，利用已有的静态PPI网络比对算法对$SG$和$DG$进行比对，得到对应的比对$f$，用它当做问题\ref{probdgna}的解。
 
-这样的方案的好处在于，能够利用已有的静态PPI网络匹配算法，解决动态PPI网络匹配的问题，但是，这样算得的匹配，在动态PPI网络的环境下，得到的各项匹配衡量指标，是否是最优的呢？答案显示是否定的，因为这样的做法是直接把动态PPI网络的一条边当做静态网络边，意味着这条边在所有时刻都是活跃的，但是实际上这条边只在某些时刻才是处于活跃状态的，因此，既有的静态匹配算法无论在相似度的估计上，还是在匹配点对生成上，都会被这条看似永久活跃，其实只在某些时刻活跃的边所“迷惑”，产生不精准的相似度估计或者匹配方案。
+这样的方案的好处在于，能够利用已有的静态PPI网络比对算法，解决动态PPI网络比对的问题，但是，这样算得的比对结果，在动态PPI网络的环境下，得到的各项比对衡量指标，是否是最优的呢？答案显然是否定的，因为这样的做法是直接把动态PPI网络的一条边当做静态网络边，意味着这条边在所有时刻都是活跃的，但是实际上这条边只在某些时刻才是处于活跃状态的，因此，既有的静态比对算法无论在相似度的估计上，还是在匹配点对生成上，都会被这条看似永久活跃，其实只在某些时刻活跃的边所“迷惑”，产生不精准的相似度估计或者比对方案。
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \subsection{方案二}
-第二种方案，便是将动态PPI网络$G_2$看成若干个静态PPI网络，然后利用已有的静态PPI网络匹配算法，逐个进行匹配并衡量匹配标准，从中选取拥有最好匹配效果的匹配方案作为最后的匹配结果$objf$。
+第二种方案，便是利用已有的静态PPI网络比对算法，将$SG$与动态PPI网络$DG$的所有分时网络$DG_i$一一作对比，并衡量静态比对指标，从中选取拥有最好比对效果的比对方案作为最后的比对$f$。
 
-这种方法的优点在于，算法确实是在对真实的PPI网络进行匹配，得到的匹配衡量指标具有较好的效果与真实性，然而这个方案的缺点也显而易见：非常消耗时间，假设动态PPI网络的时间跨度为$T$，而静态匹配算法匹配两个静态PPI网络的时间复杂度为$\mathcal{O}(S)$，那么这种方案总的时间复杂度便是$\mathcal{O}(S*T)$，相对于方案一来说，从本来的只要匹配一次变成了需要匹配$T$次，这对于一些已有的比较耗时的静态匹配算法来说，无疑是不可接受的。
+这种方法的优点在于，算法确实是在对真实的PPI网络进行比对，得到的比对衡量指标具有较好的效果与真实性，然而这个方案的缺点也显而易见：非常消耗时间，假设动态PPI网络的时间跨度为$T$，而静态比对算法比对两个静态PPI网络的时间复杂度为$\mathcal{O}(S)$，那么这种方案总的时间复杂度便是$\mathcal{O}(S*T)$，相对于方案一来说，从本来的只要比对一次变成了需要比对$T$次，这对于一些已有的比较耗时的静态比对算法来说，无疑是不可接受的。
 
-总体上看，方案一时间快但效果差，而方案二效果好但十分耗时，是否能够有一个折中的方案呢？我们希望得到一个不但时间消耗不大，且依旧能够得到较优匹配效果的算法。
+总体上看，方案一时间快但效果差，而方案二效果好但十分耗时，是否能够有一个折中的方案呢？我们希望得到一个不但时间消耗不大，且依旧能够得到较优比对效果的算法。
 
-为此，本文提出了SGOPT（SeGment tree OPTimization）算法，不仅能够在既有静态匹配算法的基础上提高匹配效果，时间上也不会像逐个匹配一般地耗时，可以说是一种折中的算法，最关键的是，它是基于动态PPI网络所提出的算法，不同于已有的静态匹配算法，是对动态PPI网络这个新环境下的新问题的一种创新性的尝试。
+为此，本文提出了SGOPT（SeGment tree OPTimization）算法，不仅能够在既有静态比对算法的基础上提高比对效果，时间上也不会像逐个比对一般的耗时，可以说是一种折中的算法，最关键的是，它是基于动态PPI网络所提出的算法，不同于已有的静态比对算法，是对动态PPI网络这个新环境下的新问题的一种创新性的尝试。
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \section{SGOPT算法}
-这一部分主要介绍SGOPT算法，也是本文主要工作所在。可以看到，在所有动态匹配衡量标准的定义中，分子都是$|f_i(E_1)|$，而这个分子的意义，就是在$i$时刻，源网络$G_1$在匹配$f$下，$E_1$中仍然被保留（匹配）的边的数量。所以，一个直观的想法，就是不断调整匹配$f$，使得
+这一部分主要介绍SGOPT算法，也是本文主要工作所在。
 
-\begin{equation}\label{myworkmaxfidefine}    
-\underset{i}{max}\{ |f_i(E_1)|\}
-\end{equation}
+由定义\ref{defndec}，\ref{defndics}，\ref{defnds3}可知，在所有动态比对衡量标准的定义中，分子都是$|f_i(SE)|$。
 
-最大化。要计算公式\ref{myworkmaxfidefine}的值，需要考查每一时刻$i$下，$E_1$中被保留的边数，假设时间跨度为$T$，则暴力需要$\mathcal{O}(|E_1|*T)$的时间才能完成公式\ref{myworkmaxfidefine}的计算，计算方法为，查看$E_1$中的每一条边$(u,v)$，然后计算每个时刻下i，$Act_i(f(u),f(v))$的值，如果为1，则说明$(u,v)$在该时刻下是被保留的边，这个值可以在$\mathcal{O}(1)$时间内完成，所以完成所有$E_1$中的边的检验的总时间便是$\mathcal{O}(|E_1|*T)$。
+\begin{defn}[CE指标]
+\label{defnce}
+已知一个静态PPI网络$SG(SV,SE)$和一个动态PPI网络$DG(DV,DE,L,R,T)$，以及一个$SG$和$DG$之间的比对$f$，则比对$f$的\textbf{CE指标}为$$CE(f)=\underset{i}{max}\{ |f_i(SE)|\}$$。
+\end{defn}
 
-而SGOPT算法要做的第一步，就是将这个时间从$\mathcal{O}(|E_1|*T)$变成了$\mathcal{O}(|E_1|*log(T))$，也就是说，对于$E_1$中的每一条边，计算它在每个时刻内是否被保留的信息，从原本的时间复杂度$\mathcal{O}(T)$，变成了$\mathcal{O}(log(T))$。
+如何\textbf{最大化CE指标}，便是SGOPT算法的目的。
 
-SGOPT算法的第二步，则是利用第一步可以高效计算公式\ref{myworkmaxfidefine}的基础上，通过一种局部调整当前匹配$f$的启发式策略，同时维护公式\ref{myworkmaxfidefine}的值，最终得到一个使得公式\ref{myworkmaxfidefine}的值最大化的匹配$f$。
+首先，要计算CE指标的值，就需要知道所有$|f_i(SE)|$值，即每一时刻$i$下，$SG$中保留边集合的大小。
 
 
+\begin{thm}
+\label{thmfi}
+已知一个静态PPI网络$SG(SV,SE)$和一个动态PPI网络$DG(DV,DE,L,R,T)$，以及一个$SG$和$DG$之间的比对$f$，计算$|f_i(SE)|$需要$\mathcal{O}(|SE|)$的时间。
+\end{thm}
+\begin{proof2}
+由$f_i(SE)$的定义\ref{defncedge}可知，要计算$|f_i(SE)|$，考查$SE$中的每一条边在时刻$i$时是否被保留即可，总共有$\mathcal{O}(|SE|)$条边，而对于每一条边$(u,v)\in SE$，如果$(f(u),f(v))\in DE_i$，则说明$(u,v)$是保留边，而由$DE_i$的定义\ref{defnactedge}，边$(f(u),f(v))$是否属于$DE_i$可在$\mathcal{O}(1)$的时间内判定。综上可知，计算$|f_i(SE)|$可在$\mathcal{O}(|SE|)$的时间内完成。
+\end{proof2}
+\begin{cor}
+\label{corceforce}
+已知一个静态PPI网络$SG(SV,SE)$和一个动态PPI网络$DG(DV,DE,L,R,T)$，以及一个$SG$和$DG$之间的比对$f$，则计算CE指标需要$\mathcal{O}(|SE|*T)$的时间。
+\end{cor}
+\begin{proof2}
+由定理\ref{thmfi}可知，计算时刻$i$下的$f_i(SE)$需要$\mathcal{O}(|SE|)$的时间，这样的时刻共有$T$个，故需要$\mathcal{O}(|SE|*T)$的时间。
+\end{proof2}
+\begin{cor}
+\label{corcesingle}
+已知一个静态PPI网络$SG(SV,SE)$和一个动态PPI网络$DG(DV,DE,L,R,T)$，以及一个$SG$和$DG$之间的比对$f$，并且已知所有的$|f_i(SE)|$值，此时，如果比对$f$发生改变导致某条边$(u,v)\in SE$的映射关系发生变化，那么重新计算所有$|f_i(SE)|$的值需要$\mathcal{O}(T)$的时间。
+\end{cor}
+\begin{proof2}
+如果只有边$(u,v)$的映射关系发生变化，只要单独重新检查$(u,v)$在每个时刻$i$下是否是保留边即可，总时间为$\mathcal{O}(T)$。
+\end{proof2}
+由推论\ref{corcesingle}可知，如果改变比对$f$，则需要在$\mathcal{O}(T)$的时间内重新维护CE指标。而SGOPT算法要做的第一步，就是将这个时间从$\mathcal{O}(T)$变成了$\mathcal{O}(log(T))$，大大降低了维护CE指标的时间。
+
+SGOPT算法的第二步，则是设计了一种局部调整的启发式策略，来不断调整比对$f$，同时维护CE指标，最终得到一个CE指标最大化的比对$f$。
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \subsection{从$\mathcal{O}(T)$到$\mathcal{O}(log(T))$的转化}
-先考虑这样一个问题，假设有一个整数序列$a$，长度为$T$，序列$a$为
 
-\begin{equation}\label{myworkseqdefine}    
-a=[a_1,a_2,a_3,.....,a_T]
-\end{equation}
+在证明SGOPT算法可以将维护CE指标的时间从$\mathcal{O}(T)$降到$\mathcal{O}(log(T))$之前，先考虑另外一个问题。
 
-其中$a_i$为序列中第$i$个整数。现在有三种操作。
+\begin{prob}[整数序列问题]
+\label{problist}
+假设有一个整数序列$A$，长度为$T$，序列$A$为
+\begin{equation*}   
+A=[A_1,A_2,A_3,...,A_T]
+\end{equation*}
+其中$A_i$为序列中第$i$个整数。现在有三种操作。
 
-第一种，把第$l$个到第$r$个（$l\leq r$）的所有整数都加上一个共同的数字$d$，简称$ADD(l,r,d)$。
+第一种，给定$l,r,d(l\leq r,d>0)$，要求把序列$A$中的第$l$个到第$r$个整数都加上一个共同的正整数$d$，称作$ADD_A(l,r,d)$。
 
-第二种，把第$l$个到第$r$个（$l\leq r$）的所有整数都减去一个共同的数字$d$，简称$SUB(l,r,d)$。
+第二种，给定$l,r,d(l\leq r,d>0)$，要求把序列$A$中的第$l$个到第$r$个整数都加上一个共同的正整数$d$，称作$SUB_A(l,r,d)$。
 
-第二种，求出第$l$个到第$r$个（$l\leq r$）的所有整数中最大的那个数，简称$MAX(l,r)$。
+第三种，给定$l,r(l\leq r)$，求出序列$A$中第$l$个到第$r$整数中最大的那个数，称作$MAX_A(l,r)$
 
-如果用一个数组来维护序列$a$，则对于以上三个操作中的任意一个操作，可以在$\mathcal{O}(r-l)$的时间内暴力的维护序列中的每个整数值，但是其实有更好的方法。
+问，完成这三种操作的时间复杂度分别是多少？
+\end{prob}
 
-那么如何快速地完成这些操作呢？答案便是使用线段树（segment tree）这种数据结构\cite{de2000computational}。线段树是一种非常适合维护区间上操作的数据结构，对于一个长度不超过$T$的区间，其本质是一颗高度不超过$\mathcal{O}(log(T))$满二叉树，线段树的空间复杂度为$\mathcal{O}(T)$，而对于上述的三种操作中的任意一种操作，线段树都能够在不超过树高$\mathcal{O}(log(T))$的时间复杂度内完成。
+如果用一个数组来表示序列$A$，则对于以上三个操作中的任意一个操作，可以在$\mathcal{O}(r-l)=\mathcal{O}(T)$的时间内暴力地更新每一个整数，但是其实有更好的方法。
 
-那么这个问题对于本文研究的问题有什么作用呢？答案是可以将计算公式\ref{myworkmaxfidefine}的过程转化成该问题，然后用线段树在$\mathcal{O}(log(T))$时间内解决。
+\begin{lem}
+\label{lemlistsg}
+给定问题\ref{problist}，可以在$\mathcal{O}(log(T))$时间内完成$ADD_A,SUB_A,MAX_A$三种操作。
+\end{lem}
+\begin{proof2}
+要在$\mathcal{O}(log(T))$时间内完成三种操作，使用线段树(segment tree)即可。线段树\cite{de2000computational}是一种非常适合维护区间上操作的数据结构，对于一个长度不超过$T$的区间，其本质是一颗高度不超过$\mathcal{O}(log(T))$满二叉树，线段树的空间复杂度为$\mathcal{O}(T)$，而对于上述的三种操作中的任意一种操作，线段树都能够在不超过树高$\mathcal{O}(log(T))$的时间复杂度内完成。
+\end{proof2}
 
-考虑本文研究问题的一个部分匹配$fp$，不同于$f$的是，$G_1$中的点$v$在部分匹配$fp$下可能并没有对应的$G_2$中的匹配点，用$fp(v)=undefined$来表示。同时用$fp^{-1}(v)=undefined$来表示$G_2$中的点$v$并没有被$G_1$中的任何一个点所匹配。
+那么这个问题的意义何在呢？答案便是可以将维护CE指标的问题转化成该问题，然后证明维护CE指标可以在$\mathcal{O}(log(T))$的时间内完成。
 
-假设在$fp$这个匹配下，我们已经知道了所有时刻$i$下，$|fp_i(E_1)|$的值($fp_i(E_1)$即为在匹配$fp$下，$E_1$在$i$时刻下被保留的边的集合。这样的值共有$T$个，构成了一个整数序列，定义为
+我们将推论\ref{corcesingle}推翻，重新定义维护CE指标的问题。
 
-\begin{equation}\label{myworkfseqdefine}    
-SEQ(fp)=[|fp_1(E_1)|,|fp_2(E_1)|,.....,|fp_T(E_1)|]
-\end{equation}
+\begin{defn}[比对$f$的CE序列]
+\label{defnfseq}
+已知一个静态PPI网络$SG(SV,SE)$和一个动态PPI网络$DG(DV,DE,L,R,T)$，以及一个$SG$和$DG$之间的比对$f$，并且已知所有的$|f_i(SE)|$值，则整数序列$$SEQ(f)=[|f_1(SE)|,|f_2(SE)|,...,|f_T(SE)|]$$称为两个PPI网络在比对$f$下的\textbf{CE序列}。比对$f$的CE指标便是这个序列中的\textbf{最大整数}，即$$CE(f)=MAX_{SEQ(f)}(1,T)$$
+\end{defn}
 
-现在，如果我们要往匹配$fp$中添加一对新的匹配点对$(u,v)(u\in V_1,v\in V_2,fp(u)=undefined,fp^{-1}(v)=undefined)$，并且令新的匹配为$fn=fp\bigcup \{(u,v)\}$，那么可以将这种操作作如下定义
+\begin{prob}[维护CE指标的问题]
+\label{probsingle}
+已知一个静态PPI网络$SG(SV,SE)$和一个动态PPI网络$DG(DV,DE,L,R,T)$，以及一个$SG$和$DG$之间的比对$f$，并且已知$SEQ(f)$，此时，如果比对$f$发生改变导致某条边$(u,v)\in SE$的映射关系发生变化，那么重新计算$SEQ(f)$的时间复杂度是多少？
+\end{prob}
 
-\begin{equation}\label{myworkfadddefine}    
-SEQ(fn)=ADD\_MATCH(SEQ(fp),(u,v))
-\end{equation}
+下面证明可以将问题\ref{probsingle}转化为问题\ref{problist}，从而在$\mathcal{O}(log(T))$时间内解决问题\ref{probsingle}。
 
-那么，在$ADD\_MATCH$操作后，$SEQ(fp)$就变成了$SEQ(fn)$。而由$SEQ$的定义可知，$ADD\_MATCH$操作的本质，就是将匹配$fp$下各个时刻的$|fp_i(E_1)|$值，变成了匹配$fn$下各个时刻的$|fn_i(E_1)|$值。
+\begin{thm}
+\label{thmtrans}
+问题\ref{probsingle}可以转化为问题\ref{problist}，并且在$\mathcal{O}(log(T))$时间内解决。
+\end{thm}
+\begin{proof2}
+由问题\ref{probsingle}的定义，假设变化前和变化后的比对分别是$fp$和$fn$，我们来看$SEQ(fn)$相比$SEQ(fp)$发生了什么变化。由于只有边$(u,v)$的映射关系发生了变化，我们可以将这个过程看成先去掉映射$u\rightarrow fp(u),v\rightarrow fp(v)$，然后添加新的映射$u\rightarrow fn(u),v\rightarrow fn(v)$。
 
-现在证明可以利用线段树在$\mathcal{O}(log(T))$时间内完成$ADD\_MATCH$操作。
+我们先去掉两个映射关系$u\rightarrow fp(u),v\rightarrow fp(v)$。按照推论\ref{corcesingle}，我们要检查$(u,v)$在每个时刻$i$时，映射边$(fp(u),fp(v))$和$DE_i$的关系。
 
-添加匹配点对$(u,v)$之后，考查满足$x\in N(u),y\in N(v),fn(x)=y$的任意点对$(x,y)$。由定义可知，在$E_1$中，边$(u,x)$通过匹配$fn$被映射到了$E_2$中的$(v,y)$，而边$(v,y)$在$[L(v,y),R(v,y)]$这个时间区间内是处于活跃状态的，所以对于任意时刻$i\in [L(v,y),R(v,y)]$，$fn_i(E_1)$因为$(u,v)$这一新的匹配点对的加入，而在$fp_i(E_1)$的基础上，多了$(u,x)$这一条被保留的边。也就是说，$SEQ(fp)$这个序列在$[L(v,y),R(v,y)]$这个区间内的所有数值都加了1，这不就是对$SEQ(fp)$进行了$ADD(L(v,y),R(v,y),1)$操作么？
+由定义\ref{defnactedge}，$(fp(u),fp(v))\in DE_i$当且仅当$(fp(u),fp(v))\in DE$且$L(fp(u),fp(v))\leq i\leq R(fp(u),fp(v))$。
 
-如果用一颗长度为$T$的线段树来维护整数序列$SEQ(fp)$，那么每一次的$ADD\_MATCH$操作，都可以通过对该线段树进行若干次（由符合条件的u和v的邻居点对个数决定）$ADD$操作来实现从$SEQ(fp)$到$SEQ(fn)$的转化，因此，其总的时间复杂度便是$\mathcal{O}(log(T))$。
+情况一，$(fp(u),fp(v))\notin DE$，那么无论什么时刻，$(u,v)$都不可能成为一条保留边。所以去掉$u\rightarrow fp(u)$和$v\rightarrow fp(v)$映射关系后，所有的$|fp_i(SE)|$值不会发生改变。
 
-而通过不断加匹配点对，最终，部分匹配会变成一个完整的匹配$f$(即$G_1$中每个点都得到了匹配)，此时，这颗线段树所维护的，正是$SEQ(f)$。而$SEQ(f)$中的最大值，正是公式\ref{myworkmaxfidefine}的值，这个值，则可以通过对该线段树进行$MAX(1,T)$操作来得到。
+情况二，$(fp(u),fp(v))\in DE$，那么在$[L(fp(u),fp(v)),R(fp(u),fp(v))]$这个时间区间内的任意时刻，$(u,v)$是一条保留边，去掉映射关系后，$\forall i\in [L(fp(u),fp(v)),R(fp(u),fp(v))],|fp_i(SE)|\leftarrow |fp_i(SE)|-1$，即$SUB_{SEQ(fp)}(L(fp(u),fp(v)),R(fp(u),fp(v)),1)$。
 
-综上所述，对于一个当前的部分匹配，我们可以使用$ADD\_MATCH$操作不断往当前匹配中添加新的匹配点对，最终得到一个完整匹配。这之间所用的总时间是$\mathcal{O}(N*log(T))$，$N$为$ADD\_MATCH$的操作次数。
+现在增加两个映射关系$u\rightarrow fn(u),v\rightarrow fn(v)$。也是分两种情况。
 
-这样，我们就完成了从$\mathcal{O}(T)$到$\mathcal{O}(log(T))$的转化。
+情况一，$(fn(u),fn(v))\notin DE$，添加映射关系后，所有的$|fp_i(SE)|$值不会发生改变，即$\forall i,|fn_i(SE)|=|fp_i(SE)|$。
 
+情况二，$(fn(u),fn(v))\in DE$，添加映射关系后，$\forall i\in [L(fn(u),fn(v)),R(fn(u),fn(v))],|fn_i(SE)|\leftarrow |fp_i(SE)|+1$，即$ADD_{SEQ(fp)}(L(fn(u),fn(v)),R(fn(u),fn(v)),1)$。
+
+可以看到，从$SEQ(fp)$到$SEQ(fn)$的变化，其实质，就是对一个整数序列进行ADD或SUB操作，而由定义\ref{defnfseq}，要得到新比对$fn$的CE值标，对$SEQ(fn)$进行MAX操作即可。
+
+这就完成了问题\ref{probsingle}到问题\ref{problist}的转化，而由引理\ref{lemlistsg}可知，用线段树可以在$\mathcal{O}(log(T))$时间内解决问题\ref{problist}。所以问题\ref{probsingle}可以在$\mathcal{O}(log(T))$的时间复杂度内解决。
+\end{proof2}
+
+由定理\ref{thmtrans}可以得到一个显然的推论。
+\begin{cor}
+\label{corcemany}
+已知一个静态PPI网络$SG(SV,SE)$和一个动态PPI网络$DG(DV,DE,L,R,T)$，以及一个$SG$和$DG$之间的比对$f$，并且已知$SEQ(f)$，此时，如果比对$f$发生改变导致$SE$中的$N$条边的映射关系发生变化，那么重新计算$SEQ(f)$的时间复杂度为$\mathcal{O}(N*log(T))$
+\end{cor}
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \subsection{启发式局部调整策略}
-在有了线段树这一利器后，SGOPT算法缺少的，就是如何调整当前匹配的策略(添加或减少匹配点对)。
+在有了线段树这一利器后，SGOPT算法的第二步，就是通过不断调整比对$f$来最大化CE指标的过程。
 
-现在，我们已经做到了可以对任意部分匹配$fp$，用在$\mathcal{O}(log(T))$的时间维护$SEQ(fp)$。根据$ADD\_MATCH$操作，我们可以从一个空的匹配集合和一颗序列长度为$T$且数值全为0的线段树开始，不断加入新的匹配点对$(u,v)$，在$\mathcal{O}(log(T))$的时间内维护线段树，直到再没有匹配点对能够加入为止，最终产生的结果就是全局匹配$f$。
+\begin{defn}[比对单次调整]
+\label{defnfsingle}
+已知一个静态PPI网络$SG(SV,SE)$和一个动态PPI网络$DG(DV,DE,L,R,T)$，以及一个$SG$和$DG$之间的比对$f$。往比对集合$set(f)$加入一对匹配点对或删除$set(f)$中一对匹配点对，称为对比对$f$的\textbf{单次调整}。更形式化地，加入或删除一对匹配点对$(u,v)$用
+$$fn=ADJ_{fp}((u,v))$$
+来表示。其中$fp,fn$分别为调整前和调整后的比对。如果$u,v\notin set(fp)$，则是添加操作，如果$(u,v)\in set(fp)$则是删除操作。
+\end{defn}
 
-因此，利用这个框架，SGOPT算法可以结合任意已有的静态PPI网络匹配算法，将它们的匹配$f$结果作为输入，可以在$\mathcal{O}(|E_1|*log(T))$时间内算出$SEQ(f)$，比之前$\mathcal{O}(|E_1|*T)$的方式快了一个数量级。
+\begin{defn}[比对调整边集]
+\label{defnadjedge}
+已知一个静态PPI网络$SG(SV,SE)$和一个动态PPI网络$DG(DV,DE,L,R,T)$，以及一个$SG$和$DG$之间的比对$f$，进行$ADJ_f((u,v))$操作，那么集合$SE_f((u,v))=\{(u,x):x\in N(u)\}$表示$SE$中所有因为$ADJ_f((u,v))$操作而导致映射关系发生变化的边的集合，称为比对$f$关于$(u,v)$的\textbf{比对调整边集}。
+\end{defn}
 
-而且，在这个框架下，我们不但可以加入匹配点对，也可以删除匹配点对，与加入的操作一样，删除操作同样可以在$\mathcal{O}(log(T))$时间内维护$SEQ(fp)$。
+\begin{thm}[比对单次调整复杂度]
+\label{thmfsingle}
+已知一个静态PPI网络$SG(SV,SE)$和一个动态PPI网络$DG(DV,DE,L,R,T)$，以及一个$SG$和$DG$之间的比对$f$，并且已知$SEQ(f)$。如果进行$ADJ_f((u,v))$操作，那么重新计算$SEQ(f)$的时间复杂度为$\mathcal{O}(|N(u)|*log(T))$
+\end{thm}
+\begin{proof2}
+由定义\ref{defnadjedge}可知，$ADJ_f((u,v))$操作后，$SE$中映射关系发生变化的边集为$SE_f((u,v))$，而|$SE_f((u,v))|=|N(u)|$，故由推论\ref{corcemany}可得，重新计算$SEQ(f)$的时间复杂度为$\mathcal{O}(|N(u)|*log(T))$
+\end{proof2}
 
-定义$DEL\_MATCH(SEQ(fn),(u,v))$操作表示将匹配$(u,v),fn(u)=v$从匹配$fn$中删去，而得到的新的匹配为$fp=fn-\{(u,v)\}$。即
+基于定理\ref{thmfsingle}本文提出了一种启发式的比对局部调整策略，通过不断进行比对的单次调整来最大化CE指标。
 
-\begin{equation}\label{myworkfdeletedefine}    
-SEQ(fp)=DELETE\_MATCH(SEQ(fn),(u,v))
-\end{equation}
+局部调整策略的伪代码可以见算法\ref{alg:1}。算法的总体思想是：每次迭代，随机删除当前比对集合的一部分，然后加入新的匹配点对来调整比对集合，如果得到的新比对CE指标较好，则保留，否则放弃这个新比对集合，继续下一轮迭代。
 
-对于将要删除的匹配点对$(u,v)$，考查满足$x\in N(u),y\in N(v),fn(x)=y$的任意点对$(x,y)$，进行$SUB(L(v,y),R(v,y),1)$操作便可以维护出$SEQ(fp)$，所以$DELETE\_MATCH$操作可以在$\mathcal{O}(log(T))$的时间复杂度内完成。
+$\alpha$和$\beta$都是参数，分别表示\textbf{迭代次数上限}以及\textbf{匹配点对删除比例}。
 
-于是，对于一个匹配$fp$，无论是添加一对匹配点对$(u,v)$，还是删除一对匹配点对$(u,v)$，都可以在$\mathcal{O}(log(T))$内做到。在这个优化框架下，本文提出了一种在动态PPI网络环境下的启发式局部调整策略，策略的目标是尽量最大化公式\ref{myworkmaxfidefine}的值，以期能够获得效果较好的新匹配。
+第1行到第2行是初始化过程。
 
-局部调整策略的伪代码可以见算法\ref{alg:1}。算法的总体思想是通过随机删除已有匹配的一部分，并且加入一部分别的匹配点对来调整当前匹配。
+第3行到第14行是整个迭代的循环，迭代的次数由$\alpha$参数决定，整个循环是不断调整比对$fp$的过程。
 
-$\alpha$和$\beta$都是参数，分别表示\textbf{迭代次数上限}以及\textbf{匹配删除比例}。
+第6行到第7行，算法从$set(fp)$中随机挑出若干个匹配点对，挑出的点对数目由参数$\beta$决定，并且把这些匹配点对从$set(fp)$中删去，调整比对$fp$。
 
-第1行到第3行是初始化过程，对于任意匹配$f$，算法将该匹配$f$作为需要调整的初始匹配，用线段树来维护$SEQ$序列。$ADD\_MATCH(SEQ,f)$是一系列$ADD\_MATCH(SEQ,(u,v)),(u,v)\in f$操作的集合（下同）。
+第8行，算法构造了一个二分图$bg$，左右顶点集$X,Y$分别由$SG$和$DG$中未被匹配的点构成，而任意点对$(u,v)$间的二分图权值即$(u,v)$在比对$fp$下的贡献值$F_{fp}(u,v)$。
 
-第5行到第20行是整个迭代的循环，迭代的次数由$\alpha$参数决定，整个循环是不断调整既有匹配$fp$的过程。
+第9行，得到二分图$bg$的最大权值匹配集合$M$，要注意的是，这个二分图的最大权值匹配，不包括权值为0的边(对$fp$没有任何贡献效益的匹配点对)。
 
-第6行到第11行，算法从$fp$中随机挑出若干个匹配点对，挑出的数目由参数$\beta$决定，并且把这些匹配点对从$fp$中用操作$DEL\_MATCH(SEQ,f\_delete)$删去。
+第10行，将$M$中的每一对匹配点对加入$set(fp)$来调整$fp$。
 
-第12行，算法构造了一个二分图$bg$，左右顶点集$X,Y$分别由$G_1$和$G_2$中未被匹配的点构成，而任意点对$(u,v)$间的二分图权值，则由函数$NS(fp,u,v)$决定。
+第11行到第13行，比较新的比对$fp$在调整前后的CE指标，如果好于调整前的，则说明这轮迭代找到了一个更优的比对，否则，抛弃当前的比对$fp$，进行下一轮的迭代。
 
-\begin{equation}\label{myworknsdefine}
-    NS(f,u,v)=|\{(x,y):x\in N(u),y\in N(v),f(x)=y\}|
-\end{equation}
-$NS(f,u,v)$的值本质上，就是在匹配$f$的情况下，如果加入匹配点对$(u,v)$，能够对$E_1$中保留的边数增加的一个数值的估计，直观上可以认为，$NS(f,u,v)$越大，添加匹配点对$(u,v)$的效果越好。
+整个调整算法的时间复杂度在于调整比对$fp$时的复杂度和作二分图最大权值匹配时的复杂度。
 
-第13行到第19行，得到二分图$bg$的最大权值匹配集合$M$，将对应的匹配加入得到新的匹配$fp$，最后比较新的匹配$fp$在调整前后的效果差异，如果好于调整前的，则说明这轮迭代找到了一个更优的匹配，否则，抛弃当前的调整结果，进行下一轮的迭代。
+由定理\ref{thmfsingle}，单次调整$fp$的复杂度为$\mathcal{O}(|N(u)|*log(T))$，而算法每一轮迭代的调整次数，由$\beta*|set(fp)|$决定，而因为算法的随机性，可以用$SG$的平均点度$|Avg(SG)|$来估计单次调整中的$|N(u)|$部分。调整$fp$的复杂度为$\mathcal{O}(\beta*|set(f)|*|Avg(SG)|*log(T))=\mathcal{O}(\beta*|SV|*|Avg(SG)|*log(T))$
 
-值得说明的是，这个二分图的最大权值匹配，不包括权值为0的边(对既有匹配没有任何贡献效益的匹配点对)。所以在这个调整过程中后，会存在$G_1$中某些点没有得到匹配的情况。而这些点会在下一轮迭代中，和那些新的被删掉匹配的点放在一起，重新构建出一个二分图。可以看到这是一个“换入换出”(swap-in,swap-out)效果。每一次迭代，算法会“换出”一部分匹配点对，同时，“换入”一部分之前被删掉的匹配点对。本文认为，这样的局部调整策略具有较好的效果。
+对于二分图最大权值匹配，目前有不同的算法来解决这个问题，而各种算法各有各的好处。由于二分图匹配十分耗时，本文只用了贪心的方法来求二分图的最大权值匹配，时间复杂度为$\mathcal{O}(\beta*|set(f)|)=\mathcal{O}(\beta*|SV|)$
 
-整个调整算法的时间复杂度为$\mathcal{O}(\alpha\beta log(T))$，和两个参数息息相关。过小的参数可能会导致匹配效果糟糕，过大的参数，则会导致算法非常耗时，因此，需要在两个参数之间作出权衡。
+所以算法一轮迭代的时间复杂度为$\mathcal{O}(\beta*|SV|*|Avg(SG)|*log(T))$。迭代次数为$\alpha$，所以总的时间复杂度便是$\mathcal{O}(\alpha*\beta*|SV|*|Avg(SG)|*log(T))$。
+
+可以看出，算法的运行时间与$\alpha,\beta$两个参数相关。过小的参数可能会导致糟糕的调整效果，过大的参数，则会导致算法非常耗时，因此，需要在两个参数之间作出权衡。
 
 \begin{small}
 \begin{algorithm}[!htb]
@@ -201,36 +289,30 @@ $NS(f,u,v)$的值本质上，就是在匹配$f$的情况下，如果加入匹配
 \label{alg:1}
     \begin{algorithmic}[1]
     \Require
-    $G_1(V_1,E_1)$：源网络
+    $SG(SV,SE)$：源网络
     
-    $G_2(V_2,E_2,L,R,T)$：目标网络
+    $DG(DG,DE,L,R,T)$：目标网络
     
-    $f$：当前匹配
+    $f$：待调整比对
     
     $\alpha$：参数$\alpha>0$
     
     $\beta$：参数$0<\beta<1$
     
     \Ensure
-    $fp$: 新的匹配
+    $fp$: 调整后的新比对
     
     \State $fp \gets f$
-    \State $SEQ \gets [0,0,...,0]$
-    \State $SEQ \gets ADD\_MATCH(SEQ,f)$
     \State $iteration\_count \gets 0$
     \While{$iteration\_count<\alpha$}
         \State $iteration\_count\gets iteration\_count+1$
-        \State $oldSEQ\gets oldSEQ$
         \State $oldfp\gets fp$
-        \State $f\_delete\gets$从$fp$中随机挑选的$\beta*|V_1|$个匹配点对
-        \State $SEQ\gets DEL\_MATCH(SEQ,f\_delete)$
-        \State $fp \gets fp-f\_delete$
-        \State $bg\gets WeightedBipartiteGraph(\{u:fp(u)=undefined\},\{v:fp^{-1}(v)=undefined\},NS(fp,u,v))$
+        \State $ds\gets$从$set(fp)$中随机挑选的$\beta*|set(fp)|$个匹配点对
+        \State $\forall (u,v)\in ds,fp\gets ADJ_{fp}((u,v))$
+        \State $bg\gets WeightedBipartiteGraph(\{u:u\notin set(fp)\},\{v:v\notin set(fp)\},\{F_{fp}(u,v)\})$
         \State $M\gets MaximumWeightedBipartiteGraphMaching(bg)$
-        \State $fp\gets fp\bigcup M$
-        \State $SEQ\gets ADD\_MATCH(SEQ,M)$
-        \If{$MAX(SEQ)<MAX(oldSEQ)$}
-            \State $SEQ\gets oldSEQ$
+        \State $\forall (u,v)\in M,fp\gets ADJ_{fp}((u,v))$
+        \If{$CE(fp)<CE(oldfp)$}
             \State $fp\gets oldfp$
         \EndIf
     \EndWhile
@@ -239,6 +321,3 @@ $NS(f,u,v)$的值本质上，就是在匹配$f$的情况下，如果加入匹配
 \end{algorithm}
 \end{small}
 
-如果动态PPI网络中的每条边的活跃区间，不止一个呢？
-
-SGOPT算法对于不止一个活跃区间的情况，只要每次使用线段树进行操作的时候，从一个区间的操作，变成若干个区间操作叠加即可。增加的时间复杂度在于每条边的活跃区间个数。

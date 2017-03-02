@@ -5,7 +5,7 @@
 \usepackage{titlesec}
 \usepackage{indentfirst}
 \usepackage{titletoc}
-
+\usepackage{amsthm}
 
 \newcommand{\song}{\CJKfamily{SimSun}}
 \newcommand{\hei}{\CJKfamily{SimHei}}
@@ -25,16 +25,19 @@
 \renewcommand\listtablename{\hei{表目录}}
 \renewcommand\listfigurename{\hei{图目录}}
 
+\theoremstyle{definition}
+\newtheorem{thm}{\indent \hei{定理}}[chapter]%
+\newtheorem{cor}{\indent \hei{推论}}[thm]%
+\newtheorem{lem}[thm]{\indent \hei{引理}}%
 
-\newtheorem{thm}{\hei{定理}}[chapter]%
-\newtheorem{cor}[thm]{\hei{推论}}%
-\newtheorem{lem}{\hei{引理}}[chapter]%
-\newtheorem{prop}{\hei{命题}}[chapter]%
-\newtheorem{defn}{\hei{定义}}[chapter]%
-\newtheorem{exam}{\hei{例}}[chapter] %
+\newtheorem{prop}{\indent \hei{命题}}[chapter]%
 
+\theoremstyle{definition}
+\newtheorem{defn}{\indent \hei{定义}}[chapter]%
+\newtheorem{exam}{\indent \hei{例}}[chapter] %
+\newtheorem{prob}{\indent \hei{问题}}[chapter] %
 
-\newenvironment{proof}{\begin{sloppypar}\setlength{\baselineskip}{2.5em} \noindent\hei{证明：}}{\hfill$\blacksquare$\vspace{1ex}\end{sloppypar}}
+\newenvironment{proof2}{\begin{sloppypar}\setlength{\baselineskip}{2.5em} \indent\hei{证明：}}{\hfill$\blacksquare$\vspace{1ex}\end{sloppypar}}
 
 \titleformat{\chapter}[hang]{\centering\LARGE\bfseries}{\chaptername}{1em}{}
 \renewcommand{\chaptername}{第~\xCJKnumber{\thechapter}~章}
