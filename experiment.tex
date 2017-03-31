@@ -3,28 +3,43 @@
 
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \section{数据集及预处理}
-实验所用的所有数据均来自Isobase数据库\cite{park2011isobase}。该数据包含了四种生物的PPI网络数据，每种生物的PPI网络详细信息见表\ref{table:1}。表中的数据是经过预处理的，其中每个PPI网络去除了自环、重边以及独立的节点。Isobase数据库是被普遍使用的生物PPI网络数据库，因此我们选择了这个数据集。
-
+实验所用的所有数据均来自IsoBase数据库\cite{park2011isobase}。Isobase数据库是被普遍使用的生物PPI网络数据库，因此我们选择了这个数据集。该数据集包含了四种生物的PPI网络数据，分别是Saccharomyces cerevisiae(简写为S.cerevisiae或sc)，Drosophila melanogaster(简写为D.melanogaster或dm)，Caenorhabditis elegans(简写为C.elegans或ce)以及Homo sapiens(简写为H.sapiens或hs)。本文使用\cite{zhang2016method}的方法，构造了四个对应的动态PPI网络，并且实验所用的静态PPI网络是从对应的动态PPI网络中抽取的分时网络，而不是原PPI网络。对于抽取的分时网络，每种生物的网络详细信息见表\ref{table:1.1}。
 
 \begin{table}[htbp]
     \centering
-    \caption{Isobase数据库关于四种生物的PPI网络数据}
-    \label{table:1}
+    \caption{实验所用的静态PPI网络(分时网络)}
+    \label{table:1.1}
     \begin{tabular}{cccc}
          \hline 物种&点数&边数&平均点度\\
-         \hline C.elegans&2974&4827&3.25\\
-         D.melanogaster&7387&24937&6.75\\
-         H.sapiens&\bf{10296}&54654&10.62\\
-         S.cerevisiae&5523&\bf{82656}&\bf{29.93}\\
+         \hline C.elegans&2974&2653&1.78\\
+         D.melanogaster&7387&14004&3.79\\
+         H.sapiens&10296&30349&5.90\\
+         S.cerevisiae&5523&46207&16.73\\
          \hline
     \end{tabular}
 \end{table}
 
-这些都是静态的PPI网络数据，为了构造动态的PPI网络数据，本文使用\cite{zhang2016method}同本文所结合的的方法，对每个PPI网络各生成了一个动态PPI网络。为了叙述方便，对这四种生物我们简单的以ce，dm，hs，sc来称呼它们。
+而四个动态PPI网络的详细信息，见表\ref{table:1.2}。
+
+\begin{table}[htbp]
+    \centering
+    \caption{实验所用的动态PPI网络}
+    \label{table:1.2}
+    \begin{tabular}{cccc}
+         \hline 物种&T&点数&平均边数\\
+         \hline C.elegans&15&2974&1896.87\\
+         D.melanogaster&15&7387&9995.27\\
+         H.sapiens&15&10296&21772.73\\
+         S.cerevisiae&15&5523&32990.53\\
+         \hline
+    \end{tabular}
+\end{table}
 
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \section{实验方法与环境}
-除了本文提出的SGOPT算法，本文还使用了全局比对算法中的四种经典算法作为和本文算法的对比，分别是IsoRank\cite{singh2008global}，SPINAL\cite{aladaug2013spinal}，L-GRAAL\cite{malod2015graal}和PROPER\cite{kazemi2016proper}算法。SGOPT算法全部代码由Java构成，并且运行在Linux Ubuntu环境下，详细的环境参数见表\ref{table:2}。
+本文使用了全局比对算法中的四种经典算法作为和本文算法的对比，分别是IsoRank\cite{singh2008global}，SPINAL\cite{aladaug2013spinal}，L-GRAAL\cite{malod2015graal}和PROPER\cite{kazemi2016proper}算法。SGOPT算法全部代码由Java构成，并且运行在Linux Ubuntu环境下，详细的环境参数见表\ref{table:2}。
+
+对于这四种不同的静态比对算法，首先使用方案一和方案二产生两种不同的比对结果，其次，本文采用SGOPT在方案一产生的比对结果上进行优化，产生第三种比对结果，对比这三种情况下的比对结果的好坏程度。至于如何衡量比对结果的好坏，本文首先以CE指标和运行时间作为主要考量的指标，然后再比较本文中新定义的四个动态比对衡量指标，即DEC，DICS，DS$^3$和DTWC。
 
 \begin{table}[htbp]
     \centering
@@ -41,59 +56,68 @@
     \end{tabular}
 \end{table}
 
-关于实验中用到的比对衡量标准，CE指标是我们首要衡量的指标。其次，我们也要衡量DEC，DICS，$DS^3$和DTWEC这四个指标。
+本文使用\textit{算法-方案一}和\textit{算法-方案二}来表示某种算法其在方案一下和方案二下产生的比对结果，而\textit{SGOPT-算法}表示某种算法在方案一下产生的结果经过SGOPT优化后得到的第三种比对结果。例如，\textit{IsoRank-方案一}就表示IsoRank算法在方案一下产生的比对结果，\textit{SGOPT-IsoRank}就表示SGOPT优化这个结果产生的新的比对结果。
+
+为了简单起见，本文用\textit{生物1-生物2}来表示对\textit{生物1}的静态PPI网络与\textit{生物2}的动态PPI网络进行比对所得到的比对结果。例如\textit{ce-dm}表示将生物\textit{C.elegans}和\textit{D.melanogaster}进行比对得到的结果。
+
+除了对比SGOPT与其他的静态比对算法，本文还测试了SGOPT算法的两个参数对SGOPT效果的影响。
 
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-\section{关于SGOPT算法的$\alpha,\beta$参数的选择}
+\section{$\alpha,\beta$参数对结果的影响}
 
-正如前文所说的，$\alpha,\beta$作为SGOPT算法的重要参数，太小了可能会导致实验结果变差，太大了则会导致算法耗时，该如何选择一组优秀的参数呢？本文采取了实验确定的办法。
+\subsection{$\beta$参数的影响}
+参数$\beta$影响的是每次删掉的匹配点对数，因此$\beta$越大，删掉的匹配点对数便越多，二分图便越大，导致一次迭代的时间就越长。图\ref{beta}是不同$\beta$情况下SGOPT算法的运行结果。从图\ref{beta1}中可以看到，对于一个固定的$\beta$，运行时间越长，则比对的效果越好。另一方面，在同样的运行时间下，越小的$\beta$有越好的效果，$\beta=600$时，SGOPT甚至不能提高初始比对结果的CE指标，这是因为当一轮迭代中删去的匹配点对过多的时候，SGOPT面对的是一个需要全局优化的局面，而SGOPT只适于局部优化的情况，所以在全局优化的情况下，SGOPT并不能很快找到一个拥有更高CE指标的比对结果。所以SGOPT适合$\beta$比较小的情况。
 
-为了描述方便，我们用生物名称1-生物名称2的形式来代表对生物1和生物2的PPI网络进行比对的一组实验，即比对生物1的静态PPI网络和生物2的动态PPI网络，例如ce-dm就是比对ce的静态PPI网络与dm的动态PPI网络，以此类推。
-
-首先我们来确定参数$\beta$。
-
-参数$\beta$影响的是每次删掉的匹配点对数，因此$\beta$越大，删掉的匹配点对数便越多，二分图便越大，导致一次迭代的时间就越长。但是，$\beta$对比对效果的影响如何呢？我们希望挑选在同样的时间下，能够产生更好比对效果的$\beta$参数。因此，我们先给$\alpha$设定一个很大的值，让SGOPT算法可以无限迭代，然后我们选择不同的$\beta$值，让SGOPT算法分别跑10秒，20秒，30秒，40秒，50秒，60秒，看看不同的$\beta$参数在同样时间的情况下，产生的比对的效果。之所以采用比较短的运行时间，是因为在长的运行时间下，迭代的过程可能会收敛，产生的比对效果随时间的变化会变得没这么“敏感”，不利于我们观测$\beta$值对比对效果的影响。
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{pic/beta.png}
-\caption{SGOPT在不同$\beta$值时运行$10s,20s,30s,40s,50s,60s$的结果} 
-\label{fig:beta}
-\end{figure}
-
-图\ref{fig:beta}是SGOPT算法在ce-dm实验组中优化IsoRank算法的结果。$\beta$(实际值)的意思就是每次迭代时删除的匹配点对的数目(而不是比例)。蓝色曲线是$\beta$从0.1到0.6变化时SGOPT得到的比对的结果，从中可以看出，过大的$\beta$意味着每次被删掉的匹配点对数比较多，需要调整的匹配点对也越多，一轮的迭代时间会增加，同样的运行时间的情况下，在$\beta$接近0.6的时候，比对效果明显变差，说明SGOPT不适合$\beta$过大的情况。
-
-而红色曲线表明，每轮迭代时，如果删除的匹配点对数比较少，那么SGOPT算法在同样的时间内，都能很快调整出比较优的解，而且在这种情况下$\beta$稍微大点的效果会比较好。因此我们最终选定$\beta=35$作为SGOPT的参数。
-
-其实，$\beta$参数的好坏，只是决定了出同样结果的时间快慢，理论上，任意的$\beta$值，只要有一定的时间，都能够调整出好的解，但是为了更快得到这个解，我们还是希望尽量挑选出更好的$\beta$值。
-
-从SGOPT算法中可以看出，每次迭代，比对的效果不可能变差，所以随着时间的增加，比对的效果只会越来越好。但是随着时间的推移，能找到更优比对的概率变得越来越小，因此整个迭代会有一个"收敛"的过程。而$\alpha$参数是迭代次数，也就是时间长短，我们选择$\beta=35$的情况下来运行SGOPT算法，并且记录每轮迭代后当前比对的CE值。
+而图\ref{beta2}则是$\beta$比较小的时候，SGOPT算法的实验结果。可以看到此时，不同$\beta$下的结果并没有明显的差别。最终，本文设置$\beta=35$做为实验的默认参数。
 
 \begin{figure}[htbp]
-\centering
-\includegraphics[height=0.4\textheight]{pic/alpha.png}
-\caption{SGOPT每轮迭代时的比对结果(CE)} 
-\label{fig:alpha}
+    \subfigure[$\beta$从50到2000变化时(步长50)的实验结果]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/beta1.png}
+            \label{beta1}
+        \end{minipage}
+    }
+   \subfigure[$\beta$从5到50变化时(步长3)的实验结果]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/beta2.png}
+            \label{beta2}
+        \end{minipage}
+    }
+    \caption{在\textit{ce-dm}实验组下，不同$\beta$值对\textit{SGOPT-SPINAL}的实验结果的影响。不同曲线代表不同的运行时间。 }
+    \label{beta}
 \end{figure}
 
-图\ref{fig:alpha}是SGOPT算法在$\beta=35$的情况下，在实验组ce-dm上优化IsoRank算法跑了5分钟的的实验结果，可以看到，在前2000轮迭代时，比对的效果变化十分明显，而2000轮之后，比对的效果变化开始趋于平缓，说明算法能够得到更优比对的概率变低了，但是依旧呈上升趋势。
+%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+\subsection{$\alpha$参数的影响}
+
+$\alpha$参数控制SGOPT算法的迭代轮数，从SGOPT算法可以看出，随着迭代论次的不断变化，比对的CE指标会不断得到提高，可以从图\ref{alpha}中看出来。为了进一步考察迭代轮数对算法结果的影响，参见图\ref{alphad}，从中可以看出，随着迭代轮次的加多，CE指标得到提高的机会越来越少，说明算法有个收敛的过程，虽然理论上，随着迭代次数的增加，CE指标会越来越高，但是考虑到运行时间的关系，本文最终设置$\alpha=15000$作为实验的默认参数。
 
 \begin{figure}[htbp]
-\centering
-\includegraphics[height=0.4\textheight]{pic/alpha_d.png}
-\caption{SGOPT每轮迭代时的比对结果$(\Delta CE)$} 
-\label{fig:alpha_d}
+    \subfigure[CE指标随迭代论次变化的结果]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/alpha.png}
+            \label{alpha}
+        \end{minipage}
+    }
+   \subfigure[CE指标(差值)随迭代论次变化的结果]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/alphad.png}
+            \label{alphad}
+        \end{minipage}
+    }
+    \caption{在\textit{ce-dm}实验组下，\textit{SGOPT-SPINAL}的CE指标随迭代论次增加而变化的实验结果。}
+    \label{alphaall}
 \end{figure}
 
-图\ref{fig:alpha_d}是图\ref{fig:alpha}关于$\Delta CE$值(即每次迭代比对效果比之前迭代的比对效果好的量)的实验结果。从中大概可以看出，在迭代2000次以后，每次更新当前最优比对的时候，CE值增幅基本只在1，2跳动，偶尔能够有3的增幅，并且随着迭代次数的增加，这样的增幅机会变得越来越少(空隙越来越大)。最终，我们设定$\alpha=14000$作为之后实验的参数。
-
-而且，结合图\ref{fig:beta}也可以看出，$\beta=35$的情况下，算法运行$60s$之后，CE值就超过了1500，而这正是图\ref{fig:alpha}中大约迭代次数为2000左右的时候。所以SGOPT算法可以大约在1分钟左右就能找比较优的解了。
 
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \section{不同算法之间的比较}
 
-确定了$\alpha,\beta$参数以后，接下来的实验就是SGOPT算法与其他算法的比较。我们分别做了ce-dm，ce-hs，cs-sc，dm-hs，dm-sc，hs-sc六组实验，每组实验都先用四种静态比对算法，求得初始比对$f$(方案一)，然后以$f$为基础比对运行SGOPT算法，最终得到新的比对。同时，每组实验还使用四种静态比对算法在动态PPI网络组成的每个静态PPI网络上作比对(方案二)，将得到的结果与SGOPT和方案一进行比较。
-
-四种静态比对算法的运行参数见表\ref{table:3}。
+对于实验中要比较的四种静态算法，本文使用它们的默认参数，见表\ref{table:3}。
 
 \begin{table}[htbp]
     \centering
@@ -109,85 +133,175 @@
     \end{tabular}
 \end{table}
 
-图\ref{fig:all}为SGOPT算法与其他四种静态比对算法在\textbf{方案一}之下的比较结果。横坐标表示实验组，纵坐标是比对结果，可以看出，四种静态算法在动态PPI网络上的比对结果各有好坏，IsoRank的结果是最差的，而L-GRAAL的结果则比起其他三种算法都要好。SPINAL和PROPER则没有明显的效果差别。而SGOPT的柱状图表示，对于已有的四种静态比对算法，SGOPT都能在它们已有的比对上改良它们的比对效果，产生效果更好的比对。从中可以看出SGOPT算法相对于\textbf{方案一}在比对效果上有明显的优势。
-
-值得一提的是，虽然IsoRank在动态PPI网络上的比对效果非常糟糕，但是经过SGOPT改良后的比对，效果甚至高于L-GRAAL经过SGOPT改良后的比对，这可能是因为糟糕的比对给了SGOPT更多调整的机会与空间，使得SGOPT能够从全局的角度上来优化整个比对，从而产生了更优秀的比对结果。
+%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+\subsection{CE指标与运行时间}
+图\ref{ce-dm}是\textit{ce-dm}实验组的结果。图\ref{ce-dm-CE}是CE指标的实验结果，图\ref{ce-dm-Time}则是运行时间的结果。从CE指标来看，SGOPT算法好于方案一，差于方案二，唯一的例外是对于IsoRank这个算法，SGOPT的优化效果远远超出了预期。从运行时间上来看，SGOPT的运行时间与方案一相比，只多了其调整比对所运行的时间。对于方案二，由于需要对静态网络和每个分时网络逐一进行比对，整个过程十分耗时。综合考虑，SGOPT在效果上比方案一好，在时间上远快于方案二，不失为一种折中的方案。
 
 \begin{figure}[htbp]
-\centering
-\includegraphics[height=0.25\textheight]{pic/all.png}
-\caption{SGOPT与其他四种算法在\textbf{方案一}下的结果比较} 
-\label{fig:all}
+    \subfigure[CE指标]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/ce-dm-CE.png}
+            \label{ce-dm-CE}
+        \end{minipage}
+    }
+   \subfigure[运行时间]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/ce-dm-Time.png}
+            \label{ce-dm-Time}
+        \end{minipage}
+    }
+    \caption{在\textit{ce-dm}实验组下，四种静态算法在三种方案下的实验结果。}
+    \label{ce-dm}
+\end{figure}
+
+对于剩下的实验组，结果可见图\ref{ce-hs},\ref{ce-sc},\ref{dm-hs},\ref{dm-sc},\ref{hs-sc}。可以看到结果是类似的。在\textit{hs-sc}实验组中，SGOPT对SPINAL的优化效果，甚至好于SPINAL在方案二下的结果。
+
+值得一提的是PROPER算法，从实验中可以看到PROPER算法无论从时间上还是CE指标上，都是好于SGOPT的。但是值得注意的是在本实验中$T=15$，对于SGOPT算法来说很难凸显它的优势，因为实际情况中的动态PPI网络都是时间跨度比较小的网络。但是本文的算法同样适用于除PPI网络比对之外的其他的网络比对问题，在T较大的情况下，SGOPT算法的时间优势才得以体现。
+
+\begin{figure}[htbp]
+    \subfigure[CE指标]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/ce-hs-CE.png}
+            \label{ce-hs-CE}
+        \end{minipage}
+    }
+   \subfigure[运行时间]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/ce-hs-Time.png}
+            \label{ce-hs-Time}
+        \end{minipage}
+    }
+    \caption{在\textit{ce-hs}实验组下，四种静态算法在三种方案下的实验结果。}
+    \label{ce-hs}
+\end{figure}
+
+
+\begin{figure}[htbp]
+    \subfigure[CE指标]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/ce-sc-CE.png}
+            \label{ce-sc-CE}
+        \end{minipage}
+    }
+   \subfigure[运行时间]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/ce-sc-Time.png}
+            \label{ce-sc-Time}
+        \end{minipage}
+    }
+    \caption{在\textit{ce-sc}实验组下，四种静态算法在三种方案下的实验结果。}
+    \label{ce-sc}
 \end{figure}
 
 \begin{figure}[htbp]
-\centering
-\includegraphics[height=0.25\textheight]{pic/all_improve.png}
-\caption{SGOPT相比其他四种算法在\textbf{方案一}下的提高程度} 
-\label{fig:all_improve}
+    \subfigure[CE指标]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/dm-hs-CE.png}
+            \label{dm-hs-CE}
+        \end{minipage}
+    }
+   \subfigure[运行时间]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/dm-hs-Time.png}
+            \label{dm-hs-Time}
+        \end{minipage}
+    }
+    \caption{在\textit{dm-hs}实验组下，四种静态算法在三种方案下的实验结果。}
+    \label{dm-hs}
 \end{figure}
-
-图\ref{fig:all_improve}展示了SGOPT对于其他四种算法在\textbf{方案一}下的效果的提高程度，即
-\begin{equation}
-\frac{\text{提高后的CE值-提高前的CE值}}{\text{提高前的CE值}}    
-\end{equation}
-可以看到SGOPT对于提高IsoRank的比对有明显的效果。而对于其他四种算法的提高，SPINAL和PROPER能够达到40\%～60\%，而对于L-GRAAL算法效果的提高则稍微差一点，为20\%～40\%左右。然而总体上来说，有这种结果已经能够充分说明SGOPT相比\textbf{方案一}所具有的优势。
-
-图\ref{fig:all2}为SGOPT算法与其他四种静态算法在\textbf{方案二}之下的比对效果的比较结果。可以看到，除了IsoRank算法，另外的其他三种静态比对算法，在方案二的情况下，都比SGOPT算法好一点。IsoRank算法的效果则显得尤为糟糕，即使是在方案二的情况下。
-
-可见通过逐一和动态PPI网络组成的每一个静态PPI网络进行比对，从中挑选出效果最好的比对的这个方案，在\textbf{比对效果}上，依旧是静态算法比SGOPT算法略胜一筹的。但是正如前文分析的，方案二的最大缺点，则在于时间的极度消耗上。因此，我们需要对方案一，方案二，以及SGOPT算法的运行时间作比较分析，来看看孰优孰劣。
 
 \begin{figure}[htbp]
-\centering
-\includegraphics[height=0.25\textheight]{pic/all2.png}
-\caption{SGOPT与其他四种算法在\textbf{方案二}下的结果比较} 
-\label{fig:all2}
+    \subfigure[CE指标]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/dm-sc-CE.png}
+            \label{dm-sc-CE}
+        \end{minipage}
+    }
+   \subfigure[运行时间]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/dm-sc-Time.png}
+            \label{dm-sc-Time}
+        \end{minipage}
+    }
+    \caption{在\textit{dm-sc}实验组下，四种静态算法在三种方案下的实验结果。}
+    \label{dm-sc}
 \end{figure}
 
-
-图\ref{fig:allt}是SGOPT算法与其他四种静态算法在\textbf{方案一}的情况下运行时间的比较结果。由于SGOPT是基于静态算法的，所以SGOPT的运行时间肯定比对应的静态算法长(得先跑一遍静态算法求出比对$f$，SGOPT再以此为基础调整比对)。从中还可以看出，本实验中，L-GRAAL算法的运行时间较长，这是由其运行参数决定的，可以详见表\ref{table:3}。
 \begin{figure}[htbp]
-\centering
-\includegraphics[height=0.25\textheight]{pic/allt.png}
-\caption{SGOPT与其他四种算法在\textbf{方案一}下的运行时间比较} 
-\label{fig:allt}
+    \subfigure[CE指标]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/hs-sc-CE.png}
+            \label{hs-sc-CE}
+        \end{minipage}
+    }
+   \subfigure[运行时间]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \centering
+            \includegraphics[width=\linewidth]{pic/hs-sc-Time.png}
+            \label{hs-sc-Time}
+        \end{minipage}
+    }
+    \caption{在\textit{hs-sc}实验组下，四种静态算法在三种方案下的实验结果。}
+    \label{hs-sc}
 \end{figure}
 
-图\ref{fig:allt2}则是SGOPT算法与其他四种静态算法在\textbf{方案二}的情况下运行时间的比较结果。
-\begin{figure}[htbp]
-\centering
-\includegraphics[height=0.25\textheight]{pic/allt2.png}
-\caption{SGOPT与其他四种算法在\textbf{方案二}下的运行时间比较} 
-\label{fig:allt2}
+\subsection{CE指标的提高程度}
+SGOPT算法对于四种比对算法在不同实验组下，对CE指标的优化的结果见图\ref{improveCE}。可以看到SGOPT对IsoRank的优化超出了预期，对于其他三种算法，SGOPT能够优化20\%到60\%。可见SGOPT是一种行而有效的优化框架。
+\begin{figure}[!htbp]
+    \centering
+    \includegraphics[width=0.8\linewidth]{pic/improveCE.png}
+    \caption{在不同实验组下，SGOPT对于四种比对算法的CE指标的提高程度}
+    \label{improveCE}
 \end{figure}
-
-为了突出方案一，方案二以及SGOPT算法的运行时间之间的对比，我们将SGOPT与方案一的时间差，以及方案二与SGOPT的时间差，做了对比，结果见图\ref{fig:allt-t2}。其中，时间2代表的是方案二运行的时间，时间1代表的是方案一运行的时间，时间sg代表的是SGOPT算法的运行时间。从中可以很明显的看出，方案二虽然效果好于SGOPT，但是在运行时间上，相对于方案一与SGOPT之间运行时间的差距，是几十倍甚至100倍往上的差距。其中IsoRank算法和L-GRAAL算法显示的差距尤为明显，这是因为这两个算法作一次比对便需要很长的时间，而这一点，在方案二中被扩大了T倍(T为时间序列的跨度，本实验中为100)，因为从一次比对变成了T次比对。
-\begin{figure}[htbp]
-\centering
-\includegraphics[height=0.25\textheight]{pic/allt-t2.png}
-\caption{SGOPT与两种方案之间运行时间的对比} 
-\label{fig:allt-t2}
-\end{figure}
-
-综合时间和效果的比较来看，虽然方案二的比对效果较好，但是方案二在时间上的表现实在是令人难以接受的，因此，虽然方案二的比对效果略高于SGOPT的结果，也难以被采用。而方案一虽然在运行时间上比SGOPT快，但是从实验结果中可以看到，这一点的时间优势，并不能补足其在比对效果上带来的损失。因此，SGOPT算法无论从时间上，还是比对效果上，无疑是一个更好的选择。
 
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
 \section{DEC，DICS，$DS^3$，DTWEC指标的对比}
-目前为止所有的实验采用的衡量指标都是CE值，那么在另外的指标下，SGOPT算法的效果又如何呢？由于方案二的指标都高于SGOPT算法，这里只针对SGOPT算法和方案一进行了实验比较。
+目前为止所有的实验采用的衡量指标都是CE指标，那么在另外的指标下，SGOPT算法的效果又如何呢？图\ref{improveOther}是SGOPT算法对于其他指标的优化效果。
 
-图\ref{fig:other}是所有六组实验下，用SGOPT算法求得的各项指标，与优化前静态算法求得的比对得到的指标的对比。可以看到，SGOPT对于IsoRank的优化依旧非常明显，这是IsoRank算法效果太糟糕的缘故。而除了IsoRank，SGOPT在大部分情况下对于其他的四项指标都能产生很好的优化效果，而且和图\ref{fig:all_improve}相似的，在SPINAL和PROPER的优化上相差不多，而对于L-GRAAL的优化则相对较差。另外值得一提的便是优化呈负效果的那些情况。
+从不同的比对算法来看，对于IsoRank和SPINAL，可以看到SGOPT在所有实验组下都能对四项指标进行一定程度的优化。对于IsoRank，优化程度是超出预期的好，对于SPINAL，优化程度从20\%到60\%不等。在实验组\textit{hs-sc}中，对SPINAL的优化效果最好。而对于PROPER和L-GRAAL算法，SGOPT的优化效果则不如前两者。并且，SGOPT对于DICS和DS$^3$指标在实验组\textit{ce-dm,ce-hs,ce-hs,dm-hs}下没有任何优化效果。
 
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{pic/other.png}
-\caption{SGOPT相比其他四种算法在DEC，DICS，$DS^3$，DTWEC指标上提高的程度} 
-\label{fig:other}
+从不同的衡量指标来看，DEC指标的优化效果最好，接下来的则是DTWEC指标，剩下的两个指标的优化程度则较差。
+
+从不同实验组来看，可以发现在实验组\textit{dm-hs,dm-sc,hs-sc}下，SGOPT的优化效果教其他实验组好，猜想这是因为SGOPT的目标是最大化保留边的数目，而这一指标在两个网络都拥有很多边的情况下，会有更好的优化空间，所以结果也会较好。
+
+\begin{figure}[!t]
+    \subfigure[DEC指标提高程度]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \includegraphics[width=\linewidth]{pic/improveDEC.png}
+            \label{improveDEC}
+        \end{minipage}
+    }
+   \subfigure[DICS指标提高程度]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \includegraphics[width=\linewidth]{pic/improveDICS.png}
+            \label{improveDICS}
+        \end{minipage}
+    }
+     \subfigure[DS$^3$指标提高程度]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \includegraphics[width=\linewidth]{pic/improveDS3.png}
+            \label{improveDS3}
+        \end{minipage}
+    }
+     \subfigure[DTWEC指标提高程度]{
+        \begin{minipage}[b]{0.5\linewidth}
+            \includegraphics[width=\linewidth]{pic/improveDTWEC.png}
+            \label{improveDTWEC}
+        \end{minipage}
+    }
+    \caption{SGOPT算法对于其他四项指标的优化效果}
+    \label{improveOther}
 \end{figure}
-
-由DEC值的定义\ref{defndec}可知，DEC值与CE值成正比关系，而由于SGOPT算法优化的便是CE值，所以在所有实验中，DEC指标相较于静态算法肯定都可以得到优化，实验也证明了这一点。
-
-而由DICS和$DS^3$的定义\ref{defndics}, \ref{defnds3}可知，指标不仅和源网络有关，和目标网络也有关，而在目标网络是动态的情况下，优化CE值\textbf{不一定}能带动这两项指标的增长。实验也反应了这个情况，在前三组实验中，DICS在后面三种算法的优化上有时会达到负的优化效果，这样的情况出现了5次，而$DS^3$则相对较好，只出现了2次。后三组试实验中，情况则比较乐观。
-
-理论上看，SGOPT算法的目的是优化CE值，而CE值越大，意味着源网络有更多的边被保留在了目标网络中，因此对于DEC这个只考虑源网络结构的指标，有很好的优化效果。而DICS是只考虑目标网络结构的指标，着重衡量目标网络中被匹配边的稀疏程度，而不是源网络，所以在目标网络是稠密网络的情况下，以优化CE值为目的的SGOPT算法对于这个DICS这个指标比较敏感，时好时坏。而剩下的$DS^3$和DTWEC指标，则同时考虑了源网络和目标网络，因此相对于DICS指标来说，更具有综合意义。而且SGOPT对于这两个指标的敏感程度，明显没有DICS来得高，从实验结果中也可以看到。
 
 

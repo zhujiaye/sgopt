@@ -74,7 +74,6 @@ S^{3}(f)=\frac{\left | f(E_1) \right |}{\left | E_1 \right |+\left | E_2(G_2[f(V
 \begin{figure}[htbp]
 \centering
 \includegraphics[height=0.25\textheight]{pic/measure.png}
-\captionsetup{margin=50pt}
 \caption{$G$为源网络，$H$为目标网络，其中各项指标的值分别为$EC=4/5=0.8,ICS=4/5=0.8,TWEC=0.8,S^3=4/6=0.67$ \cite{saraph2014magna} \label{fig:measure}}
 \end{figure}
 
@@ -85,11 +84,11 @@ S^{3}(f)=\frac{\left | f(E_1) \right |}{\left | E_1 \right |+\left | E_2(G_2[f(V
 对于两个PPI网络$G_1(V_1,E_1),G_2(V_2,E_2)$，以及一个比对衡量标准$Q$，要求一个全局比对$f$，使得在比对$f$下，$Q$的指标最大化。
 \end{prob}
 
-问题\ref{probgna}是NP-完全的，所以现有的比对算法都是基于启发式的算法。
+问题\ref{probgna}是NP-完全的，所以现有的比对算法都是启发式算法。
 
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \section{相关工作}
-到目前为止，有很多PPI网络的全局比对算法，本文首先对主要对其中四种经典的算法进行简单的介绍，然后则介绍近年来一些文章构建动态PPI网络的方法。
+到目前为止，有很多PPI网络的全局比对算法，本文首先对其中的四种经典算法进行简单的介绍，然后介绍近年来一些文章构建动态PPI网络的方法。
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \subsection{IsoRank算法}
 IsoRank是全局网络比对问题中被提出的第一个具有开拓性意义的算法。它主要分为两步。
@@ -128,7 +127,6 @@ GRAAL算法(GRAph ALigner)是一系列算法的总称，第一个提出的算法
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{pic/graphlet.png}
-\captionsetup{margin=50pt}
 \caption{所有点数小于等于5的互不同构的小图\cite{kuchaiev2010topological}}\label{fig:graphlet}
 \end{figure}
 
@@ -137,7 +135,6 @@ GRAAL算法(GRAph ALigner)是一系列算法的总称，第一个提出的算法
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{pic/orbitcount.png}
-\captionsetup{margin=50pt}
 \caption{点$v$的小图度数$GDV(v)\cite{kuchaiev2010topological}$}\label{fig:orbitcount}
 \end{figure}
 
@@ -250,6 +247,5 @@ Pr_i((u,v))= Pr_i(u)*Pr_i(v)
 \begin{figure}[htbp]
 \centering
 \includegraphics[height=0.25\textheight]{pic/dppi.png}
-\captionsetup{margin=50pt}
 \caption{动态PPI网络 \cite{zhang2016method} \label{fig:dppi}}
 \end{figure}

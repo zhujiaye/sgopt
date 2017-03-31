@@ -6,7 +6,7 @@
 
 但是，近年来，蛋白质被发现其往往不是单一活动的。生物的细胞生命活动，是需要许多蛋白质在一起相互作用，才能够完成的，而并不是靠某个单一的蛋白质就能做到的。发现并理解蛋白质与蛋白质之间的相互作用(protein-protein interactions,PPIs)，就成为了领域内的重要课题之一。
 
-伴随着这一新课题，许多新的生物学实验\cite{uetz2000comprehensive,ito2001comprehensive,krogan2006global,han2004evidence,nabieva2005whole,yook2004functional}被设计了出来，这些实验的目的便是发现蛋白质之间的相互作用结构。而这些大量的实验结果，急需一个合适的数学模型来对它们进行建模，以便于学者们的与实验与分析。
+伴随着这一新课题，许多新的生物学实验\cite{uetz2000comprehensive,ito2001comprehensive,krogan2006global,han2004evidence,nabieva2005whole,yook2004functional}被设计了出来，这些实验的目的便是发现蛋白质之间的相互作用结构。而这些大量的实验结果，急需一个合适的数学模型来对它们进行建模，以便于学者们的实验与分析。
 
 因此，学者们就提出了蛋白质相互作用网络(protein-protein interaction networks)这一图论模型。在有了PPI网络这一模型后，类似于通过比对不同基因组序列以分析基因组的方法，通过比对两种生物间的PPI网络，也能够成为分析生物细胞体内蛋白质相互作用的一种方法。而且，PPI网络之间的比对，不但能够利用生物蛋白质之间的序列相似性，也能够利用网络之间的拓扑结构相似性，比起之前单一比较蛋白质序列相似性的方法，要好的多。
 
@@ -20,7 +20,7 @@ PPI网络比对(PPI network alignment,NA)是将两个不同物种的PPI网络进
 
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \section{研究内容}
-一个PPI网络可以看成是图论中的一个图(graph)，其中，每个蛋白质由一个点(node)表示，而蛋白质与蛋白质之间的相互作用关系，则可以看成这个图中的边(edge)，至于这个边是否带权重，则取决于研究额问题。因此，PPI网络比对其实就是对两个图的点集进行匹配的(matching)过程，而目的则是尽可能找出两个图中相似的子结构。由于寻找一个图在另一个图中的同构子图是一个NP-完全的问题\cite{cook1971complexity}，因此，想要找到一个PPI网络在另外一个PPI网络中的完全等价子图是不可能的，我们只能期望找到尽量相似的子图。
+一个PPI网络可以看成是图论中的一个图(graph)，其中，每个蛋白质由一个点(node)表示，而蛋白质与蛋白质之间的相互作用关系，则可以看成这个图中的边(edge)，至于这个边是否带权重，则取决于研究的问题。因此，PPI网络比对其实就是对两个图的点集进行匹配的(matching)过程，而目的则是尽可能找出两个图中相似的子结构。由于寻找一个图在另一个图中的同构子图是一个NP-完全的问题\cite{cook1971complexity}，因此，想要找到一个PPI网络在另外一个PPI网络中的完全等价子图是不可能的，我们只能期望找到尽量相似的子图。
 
 从一般意义上来讲，网络比对就是将两个网络的点进行匹配，使得匹配形成的两个子图，具有极高的相似程度，而这个相似度，不但可以从网络的拓扑结构上来考虑，也可以同时考虑蛋白质之间的序列相似性。
 
@@ -29,7 +29,6 @@ PPI网络比对(PPI network alignment,NA)是将两个不同物种的PPI网络进
 \begin{figure}[htbp]
 \centering
 \includegraphics[height=0.25\textheight]{pic/lna.png}
-\captionsetup{margin=50pt}
 \caption{局部网络比对，其中[1,2,3,4]可以和[A,B,C,D]匹配,也可以和[E,F,G,H]匹配 \cite{atias2012comparative} \label{fig:lna}}
 \end{figure}
 而全局网络比对，顾名思义，则是从整体上来对一个网络进行比对，它比对的不是一个网络的子图，而是整个网络，并且，点与点之间的关系是一对一(one-to-one)，而不是像LNA是多对多(many-to-many)。
@@ -37,7 +36,6 @@ PPI网络比对(PPI network alignment,NA)是将两个不同物种的PPI网络进
 \begin{figure}[htbp]
 \centering
 \includegraphics[height=0.25\textheight]{pic/gna.png}
-\captionsetup{margin=50pt}
 \caption{全局网络比对，可以看到所有点都得到了匹配 \cite{atias2012comparative} \label{fig:gna}}
 \end{figure}
 相比于LNA注重两个网络中的局部相似性，GNA更关心一个网络在整体上和另一个网络的相似程度，近来越来越得到学者们的关注。
@@ -52,7 +50,7 @@ IsoRank\cite{singh2008global}可以说是全局比对算法中的先驱，它定
 
 随之而来的问题就是，针对动态的PPI网络，能否提出切实有效的比对算法呢？这也是本文要研究的重点内容。
 
-本文首先提出了动态PPI网络的概念，然后定义了动态PPI网络比对(alignment of dynamic protein-protein interaction networks)这一全新的问题，最后设计了一种算法叫SGOPT(SeGment tree OPTimization)，并用完整的，系统的实验证明了该算法的效果。SGOPT是一种基于既有静态PPI网络比对算法的方法，它是一种迭代式地，不断更新当前解的，基于局部调整策略的算法。它可以和任意既有静态PPI网络比对算法相结合，产生更优秀的比对结果。
+本文首先提出了动态PPI网络的概念，然后定义了动态PPI网络比对(alignment of dynamic protein-protein interaction networks)这一全新的问题，最后设计了SGOPT(SeGment tree OPTimization)算法，并用实验证明了该算法的可行性。SGOPT是一种基于既有静态PPI网络比对算法的方法，它是一种迭代式地，基于局部调整策略的算法。它可以和任意既有静态PPI网络比对算法相结合，产生更优秀的比对结果，可以说是一种比对优化框架。
 %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 \section{本文结构}
 

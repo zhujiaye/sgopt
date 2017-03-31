@@ -78,7 +78,7 @@ $$DS^{3}(f)=\underset{i}{max}\frac{\left | f_i(SE) \right |}{\left | SE \right |
 
 \begin{defn}
 \label{defndtwec}
-动态PPI网络比对$f$的\textbf{DTWEC指标}为$$DTWEC(f)=\frac{DEC(f)+DICS(f)}{2}$$
+动态PPI网络比对$f$的\textbf{DTWEC指标}为$$DTWEC(f)=\underset{i}{max}(\frac{\left | f_i(SE) \right |}{\left | SE \right |}+\frac{\left | f_i(SE) \right |}{\left |DE_i(DG[f(SV)])\right |})/2$$
 \end{defn}
 
 可以看到，在动态PPI网络的环境下，所有的衡量标准，都得到了动态化的定义。
@@ -274,11 +274,11 @@ $\alpha$和$\beta$都是参数，分别表示\textbf{迭代次数上限}以及\t
 
 整个调整算法的时间复杂度在于调整比对$fp$时的复杂度和作二分图最大权值匹配时的复杂度。
 
-由定理\ref{thmfsingle}，单次调整$fp$的复杂度为$\mathcal{O}(|N(u)|*log(T))$，而算法每一轮迭代的调整次数，由$\beta*|set(fp)|$决定，而因为算法的随机性，可以用$SG$的平均点度$|Avg(SG)|$来估计单次调整中的$|N(u)|$部分。调整$fp$的复杂度为$\mathcal{O}(\beta*|set(f)|*|Avg(SG)|*log(T))=\mathcal{O}(\beta*|SV|*|Avg(SG)|*log(T))$
+由定理\ref{thmfsingle}，单次调整$fp$的复杂度为$\mathcal{O}(|N(u)|*log(T))$，而算法每一轮迭代的调整次数，由$\beta$决定，而因为算法的随机性，可以用$SG$的平均点度$Avg(SG)$来估计单次调整中的$|N(u)|$部分。调整$fp$的复杂度为$\mathcal{O}(\beta*Avg(SG)*log(T))$
 
-对于二分图最大权值匹配，目前有不同的算法来解决这个问题，而各种算法各有各的好处。由于二分图匹配十分耗时，本文只用了贪心的方法来求二分图的最大权值匹配，时间复杂度为$\mathcal{O}(\beta*|set(f)|)=\mathcal{O}(\beta*|SV|)$
+对于二分图最大权值匹配，目前有不同的算法来解决这个问题，而各种算法各有各的好处。由于二分图匹配十分耗时，本文只用了贪心的方法来求二分图的最大权值匹配，时间复杂度为$\mathcal{O}(\beta^2*Avg(SG)*Avg(DG))$
 
-所以算法一轮迭代的时间复杂度为$\mathcal{O}(\beta*|SV|*|Avg(SG)|*log(T))$。迭代次数为$\alpha$，所以总的时间复杂度便是$\mathcal{O}(\alpha*\beta*|SV|*|Avg(SG)|*log(T))$。
+所以算法一轮迭代的时间复杂度为$\mathcal{O}(\beta*Avg(SG)*log(T)+\beta^2*Avg(SG)*Avg(DG))$。迭代次数为$\alpha$，所以总的时间复杂度便是$\mathcal{O}(\alpha*(\beta^2*Avg(SG)*Avg(DG)+\beta*Avg(SG)*log(T)))$。
 
 可以看出，算法的运行时间与$\alpha,\beta$两个参数相关。过小的参数可能会导致糟糕的调整效果，过大的参数，则会导致算法非常耗时，因此，需要在两个参数之间作出权衡。
 
@@ -295,9 +295,9 @@ $\alpha$和$\beta$都是参数，分别表示\textbf{迭代次数上限}以及\t
     
     $f$：待调整比对
     
-    $\alpha$：参数$\alpha>0$
+    $\alpha$：参数$\alpha$
     
-    $\beta$：参数$0<\beta<1$
+    $\beta$：参数$\beta$
     
     \Ensure
     $fp$: 调整后的新比对
@@ -307,7 +307,7 @@ $\alpha$和$\beta$都是参数，分别表示\textbf{迭代次数上限}以及\t
     \While{$iteration\_count<\alpha$}
         \State $iteration\_count\gets iteration\_count+1$
         \State $oldfp\gets fp$
-        \State $ds\gets$从$set(fp)$中随机挑选的$\beta*|set(fp)|$个匹配点对
+        \State $ds\gets$从$set(fp)$中随机挑选的$\beta$个匹配点对
         \State $\forall (u,v)\in ds,fp\gets ADJ_{fp}((u,v))$
         \State $bg\gets WeightedBipartiteGraph(\{u:u\notin set(fp)\},\{v:v\notin set(fp)\},\{F_{fp}(u,v)\})$
         \State $M\gets MaximumWeightedBipartiteGraphMaching(bg)$
